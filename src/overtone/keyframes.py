@@ -46,14 +46,20 @@ DHASH_SIZE = 16
 def sample_times(gap: Gap, *, count: int = DEFAULT_FRAMES_PER_GAP, lookahead: float = 0.4) -> list[float]:
     """Choose timestamps to grab frames from for a gap.
 
-    Always returns ``count`` times in ascending order, spanning the pause and
-    reaching a little past its end.
+    The opening instant of a pause is skipped: a slide frequently changes right
+    as the speaker stops, so the very first frame can still show the outgoing
+    slide mid-transition. Sampling from a little way in avoids describing the
+    slide that is leaving instead of the one that has arrived. The window still
+    reaches just past the gap end to catch a slide that changes as speech
+    resumes.
     """
+    lead = min(0.5, gap.duration * 0.3)
     if count <= 1:
-        return [gap.start]
-    span = gap.duration + lookahead
-    step = span / (count - 1)
-    return [round(gap.start + step * i, 3) for i in range(count)]
+        return [round(gap.start + gap.duration * 0.6, 3)]
+    start = gap.start + lead
+    end = gap.end + lookahead
+    step = (end - start) / (count - 1)
+    return [round(start + step * i, 3) for i in range(count)]
 
 
 def average_hash(path: str | Path, *, size: int = 8) -> int:

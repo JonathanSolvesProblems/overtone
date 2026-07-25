@@ -47,10 +47,14 @@ filler, no hedging, no praise, no mention of being an AI or a description.
 - Describe only what the soundtrack does not already say. Never restate the \
 speaker.
 
+Never describe the colour, font, or background of text, an equation, or a \
+slide. The listener needs what it says, not how it looks. Read the content; \
+never say "yellow text on a dark slide".
+
 Technical content is read aloud, not named — this is what separates a usable \
 track from a useless one:
 - Equations: speak them as a person reading aloud would. "x squared plus two x \
-minus three equals zero", not "an equation".
+minus three equals zero", not "an equation" and not "an equation is shown".
 - Code: read it line by line including the punctuation that changes meaning. \
 "def quicksort, open paren, arr, close paren, colon".
 - Charts and graphs: name the axes once, then give the shape and the numbers \

@@ -33,15 +33,24 @@ class TestSampleTimes:
         assert len(times) == 3
         assert times == sorted(times)
 
-    def test_starts_at_the_gap_start(self):
-        assert sample_times(Gap(0, 10.0, 14.0), count=3)[0] == pytest.approx(10.0)
+    def test_skips_the_opening_of_the_gap(self):
+        # The first frame must not sit at the very start, where a slide may
+        # still be mid-transition. 4s gap -> lead of min(0.5, 1.2) = 0.5.
+        first = sample_times(Gap(0, 10.0, 14.0), count=3)[0]
+        assert first == pytest.approx(10.5)
+
+    def test_lead_is_capped_for_short_gaps(self):
+        # 1s gap -> lead of 0.3s, not 0.5.
+        first = sample_times(Gap(0, 10.0, 11.0), count=3)[0]
+        assert first == pytest.approx(10.3)
 
     def test_reaches_past_the_gap_to_catch_the_next_slide(self):
         times = sample_times(Gap(0, 10.0, 14.0), count=3, lookahead=0.4)
         assert times[-1] == pytest.approx(14.4)
 
-    def test_single_frame_uses_the_gap_start(self):
-        assert sample_times(Gap(0, 5.0, 9.0), count=1) == [5.0]
+    def test_single_frame_uses_the_settled_middle(self):
+        # Not the very start: 60% into a 4s gap from 5.0 -> 7.4.
+        assert sample_times(Gap(0, 5.0, 9.0), count=1) == [pytest.approx(7.4)]
 
 
 class TestHashing:
