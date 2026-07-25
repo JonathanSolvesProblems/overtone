@@ -185,7 +185,7 @@ async def _run_describe(key: str):
             work = Path("work") / "web" / key.replace("/", "_")
             res = describe_video(
                 bucket(), key, settings(),
-                work_dir=work, progress=on_progress, force=True,
+                work_dir=work, progress=on_progress, force=True, cleanup=True,
             )
             holder["result"] = res
             _guard.record_spend(res.cost["total"])

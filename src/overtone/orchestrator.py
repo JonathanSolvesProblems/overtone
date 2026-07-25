@@ -202,11 +202,38 @@ def describe_video(
     max_iterations: int = 3,
     progress: ProgressFn | None = None,
     force: bool = False,
+    cleanup: bool = False,
 ) -> VideoResult:
     """Describe one B2 video and write the results back beside it.
 
     Set ``force`` to re-describe even when a current manifest already exists.
+    Set ``cleanup`` to delete the local working directory once the outputs are
+    safely in B2 — the hosted service does this so a shared box's disk cannot
+    grow with every describe.
     """
+    try:
+        return _describe_video(
+            bucket, source_key, settings,
+            work_dir=work_dir, max_iterations=max_iterations,
+            progress=progress, force=force,
+        )
+    finally:
+        if cleanup:
+            import shutil
+
+            shutil.rmtree(Path(work_dir), ignore_errors=True)
+
+
+def _describe_video(
+    bucket: Bucket,
+    source_key: str,
+    settings: Settings,
+    *,
+    work_dir: str | Path,
+    max_iterations: int,
+    progress: ProgressFn | None,
+    force: bool,
+) -> VideoResult:
     started = time.time()
     work = Path(work_dir)
     work.mkdir(parents=True, exist_ok=True)
