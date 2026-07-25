@@ -44,24 +44,24 @@ def format_timestamp(seconds: float) -> str:
 def build_vtt(cues: list[DescriptionCue], *, kind: str = "descriptions") -> str:
     """Build a WebVTT ``descriptions`` document from cues.
 
-    The ``kind: descriptions`` header line is a WebVTT metadata header that
-    marks the whole file as a description track, which is what a conforming
-    player keys on to route these cues to a screen reader rather than the
-    caption region.
+    The ``kind: descriptions`` header line marks the whole file as a description
+    track, which a conforming player uses to route these cues to a screen reader
+    rather than the caption region.
+
+    Cue payloads are kept to **plain text with no inline markup**. The two
+    dominant lecture platforms (Panopto, Kaltura) ingest description VTTs but
+    reject in-cue tags, warning they can break playback, so the "extended"
+    marker is carried on a WebVTT ``NOTE`` line (which every conforming parser
+    ignores) instead of a ``<v>`` span. This keeps the output drop-in
+    compatible with the systems a university already runs.
     """
     lines = ["WEBVTT", f"kind: {kind}", ""]
     for cue in sorted(cues, key=lambda c: c.start):
-        settings = " A:middle" if cue.extended else ""
-        lines.append(f"{cue.index + 1}")
-        lines.append(
-            f"{format_timestamp(cue.start)} --> {format_timestamp(cue.end)}{settings}"
-        )
-        # A note in the cue payload records where the video was frozen, so a
-        # reviewer reading the raw VTT understands why the timing overlaps.
         if cue.extended:
-            lines.append(f"<v Overtone (extended)>{cue.text}")
-        else:
-            lines.append(cue.text)
+            lines.append("NOTE extended description — video paused to fit")
+        lines.append(f"{cue.index + 1}")
+        lines.append(f"{format_timestamp(cue.start)} --> {format_timestamp(cue.end)}")
+        lines.append(cue.text)
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 

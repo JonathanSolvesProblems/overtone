@@ -42,6 +42,22 @@ And one thing generic description gets wrong that matters for lectures:
    board: equations as spoken math (*"y equals m x plus b"*), code line by line
    with punctuation, charts as trends and values.
 
+Batch AI-description SaaS does exist (ViddyScribe, MediaScribe, Maestra). The
+distinction is where the work runs: those are services you upload your archive
+*to*. Overtone runs against B2 in place and writes results back beside each
+original, so the media never leaves storage you control.
+
+### Fits the workflow you already have
+
+Overtone emits a plain-text WebVTT `descriptions` track. That is exactly the
+format the two dominant university video platforms ingest: both
+[Panopto](https://support.panopto.com/s/article/How-to-Add-Audio-Descriptions)
+and [Kaltura](https://knowledge.kaltura.com/help/extended-audio-description)
+accept an audio-description VTT that begins with `WEBVTT` and carries plain,
+time-based cues (they reject in-cue markup, which is why the output is kept tag
+free). So the described track drops straight into the system a university
+already runs, and the master and manifest stay in B2.
+
 ---
 
 ## How it works

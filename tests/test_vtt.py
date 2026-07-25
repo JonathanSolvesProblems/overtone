@@ -55,9 +55,20 @@ class TestBuildVtt:
         # The cue identifier line is the index+1.
         assert "\n1\n" in "\n" + vtt
 
-    def test_extended_cue_is_annotated(self):
+    def test_extended_cue_is_annotated_with_a_note_not_markup(self):
         vtt = build_vtt([DescriptionCue(0, 5.0, 13.0, "A dense diagram.", extended=True)])
-        assert "Overtone (extended)" in vtt
+        assert "NOTE extended" in vtt
+        # Plain text only: no inline tags that Panopto/Kaltura reject.
+        assert "<v" not in vtt and "<" not in vtt.split("NOTE")[0]
+
+    def test_cue_text_is_plain_with_no_markup(self):
+        vtt = build_vtt([
+            DescriptionCue(0, 1.0, 3.0, "A red slide.", extended=True),
+            DescriptionCue(1, 5.0, 7.0, "A blue slide."),
+        ])
+        for line in vtt.splitlines():
+            if line and not line.startswith(("WEBVTT", "kind:", "NOTE")) and "-->" not in line:
+                assert "<" not in line and ">" not in line
 
     def test_trailing_newline(self):
         vtt = build_vtt([DescriptionCue(0, 1.0, 3.0, "x")])

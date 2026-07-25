@@ -50,19 +50,27 @@ usage against published provider rates and shown in the app next to each video.
 
 ## Why it's different from the AI-description tools that already exist
 
-Tools like 3Play, Verbit, and Visonic describe video with AI too. Two things
-they structurally can't copy without breaking their own business:
+AI audio description is a real category (3Play, Verbit, ViddyScribe,
+MediaScribe). I'm not claiming to invent it. What none of them do, and what this
+hackathon is actually about, is run **where the archive already lives**:
 
-- **Price.** They charge per finished minute because they keep a human in the
-  loop. That pricing cannot reach archive scale. Overtone's cost scales with
-  compute, so the unit of work is the *archive*, not the video.
-- **Locality.** They require upload. Overtone runs against B2 and writes results
-  back in place.
+- **Locality.** Every one of them is a service you upload your archive *to*, then
+  pay egress and a per-minute fee. Overtone runs against B2 directly and writes
+  the described master, VTT, transcript, and manifest back beside each original.
+  FERPA-covered recordings never leave storage the institution already trusts.
+  This is the B2-as-system-of-record story the judging criteria reward.
+- **Price at archive scale.** Per-minute, human-in-the-loop pricing cannot reach
+  10,000 hours. Overtone's cost scales with compute, so the unit of work is the
+  *archive*, not the video.
+- **Technical content.** Generic description says "a slide with an equation
+  appears." 3Play's own STEM guidance tells customers to skip description and
+  commission a MathML transcript instead. Overtone reads the board: equations as
+  spoken math, code line by line.
 
-And the thing generic description gets wrong that matters most for lectures:
-**it reads the technical content**. 3Play's own STEM guidance tells customers to
-skip audio description and commission a MathML transcript instead. Overtone reads
-the board.
+And it **fits the workflow that already exists**: the WebVTT it writes is exactly
+what Panopto and Kaltura ingest as an audio-description track (plain text, time-
+based cues, no markup), so the output drops into the platform a university
+already runs while the media stays in B2.
 
 ## How it uses Backblaze B2
 
