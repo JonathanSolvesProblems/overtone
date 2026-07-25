@@ -1,0 +1,36 @@
+[project]
+name = "overtone"
+version = "0.1.0"
+description = "Generate WCAG audio description tracks for a video archive, in place, on Backblaze B2."
+requires-python = ">=3.11"
+dependencies = [
+    "genblaze==0.4.4",
+    "genblaze-core>=0.3.7",
+    "genblaze-s3>=0.3.6",
+    "genblaze-assemblyai>=0.3.1",
+    "genblaze-hume>=0.3.2",
+    "genblaze-elevenlabs>=0.3.2",
+    "genblaze-google>=0.3.3",
+    "genblaze-openai>=0.3.3",
+    "genblaze-gmicloud>=0.3.4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.24", "ruff>=0.6"]
+
+[project.scripts]
+overtone = "overtone.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src"]

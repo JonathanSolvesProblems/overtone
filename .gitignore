@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Secrets
+.env
+.env.local
+
+# Working media and run artifacts
+work/
+out/
+*.mp4
+*.wav
+*.mp3
+*.m4a
+!tests/fixtures/**
+
+# OS
+Thumbs.db
+.DS_Store
