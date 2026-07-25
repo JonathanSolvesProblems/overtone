@@ -14,6 +14,7 @@ provider costs a retry rather than the batch.
 from __future__ import annotations
 
 import logging
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,6 +29,9 @@ from genblaze_core.models.step import Step
 from genblaze_core.providers.base import ProviderCapabilities, SyncProvider
 from genblaze_core.runnable.config import RunnableConfig
 
+from overtone._retry import RATE_LIMIT_RETRIES as _RATE_LIMIT_RETRIES
+from overtone._retry import is_rate_limit as _is_rate_limit
+from overtone._retry import retry_delay as _retry_delay
 from overtone.ffmpeg import audio_duration
 
 logger = logging.getLogger("overtone.synth")
@@ -133,18 +137,31 @@ def speak(
     last_error: Exception | None = None
 
     for voice in chain:
-        try:
-            provider = _provider_for(voice)
-            step = _make_step(voice, text, output_format)
-            provider.generate(step)
-            asset = step.assets[0]
-            path = _asset_local_path(asset.url)
-            seconds = audio_duration(path)
-        except (ProviderError, Exception) as exc:  # noqa: BLE001
-            logger.warning("tts provider %s failed: %s", voice, str(exc)[:200])
-            tried.append(str(voice))
-            last_error = exc
+        clip = None
+        for attempt in range(_RATE_LIMIT_RETRIES + 1):
+            try:
+                provider = _provider_for(voice)
+                step = _make_step(voice, text, output_format)
+                provider.generate(step)
+                asset = step.assets[0]
+                path = _asset_local_path(asset.url)
+                seconds = audio_duration(path)
+                clip = (path, seconds, step)
+                break
+            except (ProviderError, Exception) as exc:  # noqa: BLE001
+                if _is_rate_limit(exc) and attempt < _RATE_LIMIT_RETRIES:
+                    delay = _retry_delay(exc, attempt)
+                    logger.info("tts %s rate-limited; waiting %.2fs", voice, delay)
+                    time.sleep(delay)
+                    continue
+                logger.warning("tts provider %s failed: %s", voice, str(exc)[:200])
+                tried.append(str(voice))
+                last_error = exc
+                break
+
+        if clip is None:
             continue
+        path, seconds, step = clip
 
         return SpokenClip(
             path=path,

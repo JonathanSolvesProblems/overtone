@@ -121,7 +121,7 @@ class TestFailover:
     def test_falls_through_to_the_next_provider(self, frames, monkeypatch):
         def flaky(model, *args, **kwargs):
             if model.provider == "gmicloud":
-                raise ProviderError("rate limited")
+                raise ProviderError("503 service unavailable")  # not a rate limit
             return FakeResponse("A bar chart rising left to right.")
 
         monkeypatch.setattr(vision, "_call", flaky)
@@ -166,6 +166,22 @@ class TestFailover:
         monkeypatch.setattr(vision, "_call", lambda *a, **k: FakeResponse("  padded  "))
         result = describe(frames, "sys", "prompt", [VisionModel("openai", "m")])
         assert result.text == "padded"
+
+    def test_retries_a_rate_limited_provider_then_succeeds(self, frames, monkeypatch):
+        # First call is rate-limited, second succeeds on the SAME provider —
+        # the run must not fail over or give up.
+        calls = {"n": 0}
+
+        def limited_then_ok(model, *args, **kwargs):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise ProviderError("Error code: 429 - try again in 5ms")
+            return FakeResponse("A labelled diagram of three connected nodes.")
+
+        monkeypatch.setattr(vision, "_call", limited_then_ok)
+        result = describe(frames, "sys", "prompt", [VisionModel("openai", "m")])
+        assert calls["n"] == 2
+        assert result.text.startswith("A labelled diagram")
 
 
 def test_unknown_provider_is_rejected(frames):

@@ -20,6 +20,7 @@ from __future__ import annotations
 import base64
 import logging
 import mimetypes
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -30,6 +31,8 @@ from genblaze_core.models.chat import (
     ImageURLRef,
     TextContent,
 )
+
+from overtone._retry import RATE_LIMIT_RETRIES, is_rate_limit, retry_delay
 
 logger = logging.getLogger("overtone.vision")
 
@@ -160,19 +163,30 @@ def describe(
     last_error: Exception | None = None
 
     for model in chain:
-        try:
-            response = _call(
-                model,
-                frames,
-                system,
-                prompt,
-                max_tokens=max_tokens,
-                temperature=temperature,
-            )
-        except (ProviderError, Exception) as exc:  # noqa: BLE001
-            logger.warning("vision provider %s failed: %s", model, exc)
-            tried.append(str(model))
-            last_error = exc
+        response = None
+        for attempt in range(RATE_LIMIT_RETRIES + 1):
+            try:
+                response = _call(
+                    model,
+                    frames,
+                    system,
+                    prompt,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                )
+                break
+            except (ProviderError, Exception) as exc:  # noqa: BLE001
+                if is_rate_limit(exc) and attempt < RATE_LIMIT_RETRIES:
+                    delay = retry_delay(exc, attempt)
+                    logger.info("vision %s rate-limited; waiting %.2fs", model, delay)
+                    time.sleep(delay)
+                    continue
+                logger.warning("vision provider %s failed: %s", model, str(exc)[:200])
+                tried.append(str(model))
+                last_error = exc
+                break
+
+        if response is None:
             continue
 
         text = (response.text or "").strip()
