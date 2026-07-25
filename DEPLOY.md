@@ -1,13 +1,50 @@
 # Deploying the Overtone demo
 
 The app is a Python + ffmpeg service, so it needs a container host, not static
-hosting. Fly.io is the recommended target: it builds the `Dockerfile` on a
-remote builder (no local Docker needed) and runs it close to the B2
-`us-east-005` bucket.
+hosting.
 
-Your personal site stays where it is. To give the demo a nice URL like
-`overtone.yourdomain.com`, add a DNS record pointing the subdomain at the Fly
-app (step 5).
+## Live deployment: OVH box (Docker + Traefik)
+
+Overtone runs on the OVH sandbox at `~/experimental-projects/overtone/`, built
+from the public repo and routed by the box's existing Traefik (entrypoint
+`websecure`, certresolver `le`, HTTP-01), the same pattern as the other web
+stacks on that box.
+
+```
+~/experimental-projects/overtone/
+├── app/                  git clone of the public repo
+├── docker-compose.yml    Traefik-labelled web service, capped CPU/memory
+└── .env                  secrets, chmod 600
+```
+
+**Deploy / update to the latest commit:**
+
+```bash
+ssh jonathan@51.161.82.166
+cd ~/experimental-projects/overtone
+git -C app pull
+docker compose up -d --build
+docker logs -f overtone      # expect: Uvicorn running on 0.0.0.0:8080
+```
+
+**The one manual step — DNS.** Traefik cannot issue the TLS certificate until
+`overtone.jonathanandrei.com` resolves to the box. Add an `A` record in the DNS
+panel for `jonathanandrei.com`:
+
+```
+Type: A   Name: overtone   Value: 51.161.82.166   TTL: default
+```
+
+(If that domain's DNS is proxied through Cloudflare, set the record to
+"DNS only" / grey cloud so the Let's Encrypt HTTP-01 challenge reaches the box.)
+Once it resolves, Traefik obtains the certificate automatically on the next
+retry and the demo is live at `https://overtone.jonathanandrei.com`.
+
+## Alternative: Fly.io
+
+The repo also ships a `fly.toml` and `deploy-secrets.ps1` for hosting on Fly
+instead. Fly builds the `Dockerfile` on a remote builder (no local Docker
+needed).
 
 ## One-time setup
 
