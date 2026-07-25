@@ -44,9 +44,14 @@ Nothing leaves your storage. FERPA-covered recordings never go to a vendor.
 
 ## The one number
 
-On a real end-to-end run against B2, a described minute costs **under $0.01**,
-versus a human describer's **$15–$75**. The comparison is computed from metered
-usage against published provider rates and shown in the app next to each video.
+Measured, not projected: a 3-minute segment of a real MIT OpenCourseWare lecture
+(18.03 Differential Equations) cost **$0.08 to describe — about $0.03 per finished
+minute** end to end, against a human describer's **$15–$75**. The pipeline read
+the board ("A line extends from the point labeled x y upward"), found 8
+describable pauses, and wrote the results back to B2. Most of the cost is the
+premium ElevenLabs voice; OpenAI TTS at archive scale brings it toward a cent a
+minute. The comparison is computed from metered usage against published provider
+rates and shown in the app next to every video.
 
 ## Why it's different from the AI-description tools that already exist
 

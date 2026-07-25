@@ -17,8 +17,12 @@ Backblaze B2 bucket, generates a description track, and writes the described
 master back beside the original. Nothing is uploaded to a third-party vendor;
 FERPA-covered recordings never leave the storage you already trust.
 
-Measured cost on a real run: **well under $0.01 per finished minute**, against a
-human describer's $15–$75.
+**Measured on real footage:** a 3-minute segment of an actual MIT OpenCourseWare
+lecture (18.03 Differential Equations, a chalkboard class) cost **$0.08 to
+describe — about $0.03 per finished minute** end to end, against a human
+describer's **$15–$75**. Most of that is the ElevenLabs voice; swapping to OpenAI
+TTS at archive scale brings it closer to a cent a minute. Either way it is three
+to four orders of magnitude cheaper than a person.
 
 ---
 
