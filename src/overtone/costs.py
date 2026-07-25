@@ -38,6 +38,13 @@ TTS_PER_1M_CHARS = {
 # design cheap: describing in place avoids the download-to-vendor round trip.
 B2_STORAGE_PER_GB_MONTH = 0.006
 
+# The human baseline the headline is measured against. Professional audio
+# description runs $15 to $75 per finished minute depending on complexity
+# (3Play Media, Verbit, industry surveys, mid-2026). These are the numbers a
+# university actually pays, and the comparison the pitch turns on.
+HUMAN_AD_PER_MINUTE_LOW = 15.0
+HUMAN_AD_PER_MINUTE_HIGH = 75.0
+
 
 @dataclass
 class Usage:

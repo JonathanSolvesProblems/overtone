@@ -1,0 +1,34 @@
+# Fly.io configuration for the Overtone hosted demo.
+#
+# Secrets (B2 + provider keys) are NOT stored here. Set them with:
+#   fly secrets set B2_KEY_ID=... B2_APPLICATION_KEY=... B2_BUCKET=... \
+#                   B2_ENDPOINT=... B2_REGION=... ASSEMBLYAI_API_KEY=... \
+#                   OPENAI_API_KEY=... ELEVENLABS_API_KEY=...
+
+app = "overtone"
+primary_region = "iad"   # us-east, close to the B2 us-east-005 bucket
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 20
+    hard_limit = 40
+
+# A describe run holds a worker while it transcodes and calls providers, so give
+# the machine enough memory for ffmpeg on a short clip. 1GB is ample for the
+# demo's capped video length.
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"

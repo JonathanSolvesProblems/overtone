@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Overtone — audio description for your archive, in place on B2</title>
+<style>
+  :root {
+    --bg: #0b0f17;
+    --panel: #121826;
+    --panel-2: #0e1420;
+    --line: #223049;
+    --ink: #e8edf6;
+    --ink-dim: #93a2bd;
+    --ink-faint: #5f6f8c;
+    --accent: #e8613c;      /* warm red, a nod to Backblaze */
+    --accent-2: #4c9be8;
+    --good: #57c98a;
+    --radius: 14px;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: radial-gradient(1200px 600px at 80% -10%, #16203400, #0b0f17), var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-2); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  header.masthead { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
+  .logo { font-weight: 700; font-size: 22px; letter-spacing: -0.02em; }
+  .logo .dot { color: var(--accent); }
+  .tag { color: var(--ink-dim); font-size: 15px; }
+  .sub { color: var(--ink-faint); font-size: 13.5px; margin: 4px 0 26px; max-width: 720px; }
+  .sub b { color: var(--ink-dim); font-weight: 600; }
+
+  .status { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 26px; font-size: 12px; }
+  .chip { border: 1px solid var(--line); background: var(--panel-2); color: var(--ink-dim);
+          padding: 4px 10px; border-radius: 999px; }
+  .chip b { color: var(--ink); font-weight: 600; }
+  .chip.on { border-color: #2a4a37; color: var(--good); }
+
+  .grid { display: grid; grid-template-columns: 320px 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+  .panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em;
+              color: var(--ink-faint); margin: 0; padding: 16px 18px 10px; }
+
+  .vid-list { padding: 4px 8px 10px; }
+  .vid { width: 100%; text-align: left; background: transparent; border: 1px solid transparent;
+         color: var(--ink); border-radius: 10px; padding: 11px 12px; cursor: pointer; display: block; }
+  .vid:hover { background: var(--panel-2); border-color: var(--line); }
+  .vid.active { background: var(--panel-2); border-color: var(--accent); }
+  .vid .name { font-size: 13.5px; font-weight: 600; word-break: break-word; }
+  .vid .meta { font-size: 11.5px; color: var(--ink-faint); margin-top: 3px; display: flex; gap: 8px; }
+  .badge { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); }
+  .badge.done { color: var(--good); border-color: #2a4a37; }
+  .badge.todo { color: var(--accent); border-color: #4a2f26; }
+
+  .stage { min-height: 320px; }
+  .empty { padding: 60px 24px; text-align: center; color: var(--ink-faint); }
+
+  .player-wrap { padding: 16px; }
+  video { width: 100%; border-radius: 10px; background: #000; display: block; aspect-ratio: 16/9; }
+  .controls { display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+  button.btn { font: inherit; font-size: 13px; font-weight: 600; border-radius: 9px; padding: 8px 14px;
+               border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); cursor: pointer; }
+  button.btn:hover { border-color: var(--accent); }
+  button.btn.primary { background: var(--accent); border-color: var(--accent); color: #1a0d08; }
+  button.btn:disabled { opacity: 0.5; cursor: default; }
+  .toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+  .toggle button { font: inherit; font-size: 12.5px; padding: 7px 12px; background: var(--panel-2);
+                   color: var(--ink-dim); border: 0; cursor: pointer; }
+  .toggle button.sel { background: var(--accent); color: #1a0d08; font-weight: 600; }
+
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 16px 16px; }
+  @media (max-width: 620px) { .cards { grid-template-columns: 1fr; } }
+  .card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 11px; padding: 14px 15px; }
+  .card h3 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); }
+  .cost-big { font-size: 27px; font-weight: 700; letter-spacing: -0.02em; }
+  .cost-big .unit { font-size: 13px; color: var(--ink-dim); font-weight: 500; }
+  .cost-vs { margin-top: 8px; font-size: 12.5px; color: var(--ink-dim); }
+  .cost-vs s { color: var(--ink-faint); }
+  .cost-vs b { color: var(--ink); }
+  .prov { font-family: var(--mono); font-size: 11px; color: var(--ink-dim); word-break: break-all; }
+  .prov .k { color: var(--ink-faint); }
+  .prov .h { color: var(--good); }
+  .provlist { margin: 8px 0 0; padding: 0; list-style: none; }
+  .provlist li { padding: 2px 0; }
+
+  .desc-panel { padding: 4px 16px 16px; }
+  .desc-panel h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin: 12px 4px 8px; }
+  .cue { display: flex; gap: 12px; padding: 9px 12px; border-radius: 9px; border: 1px solid transparent; }
+  .cue:hover { background: var(--panel-2); }
+  .cue.live { background: #17233a; border-color: var(--accent-2); }
+  .cue .t { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); flex: none; width: 52px; padding-top: 1px; }
+  .cue .x { font-size: 14px; }
+  .cue .ex { font-size: 10.5px; color: var(--accent); border: 1px solid #4a2f26; border-radius: 999px; padding: 0 6px; margin-left: 6px; }
+
+  .live-log { padding: 16px; }
+  .live-line { font-family: var(--mono); font-size: 12.5px; padding: 5px 0; color: var(--ink-dim);
+               border-bottom: 1px solid var(--line); display: flex; gap: 10px; }
+  .live-line .ok { color: var(--good); }
+  .live-line:last-child { border-bottom: 0; }
+  .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid var(--line);
+             border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .foot { color: var(--ink-faint); font-size: 12px; margin-top: 30px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="logo">Over<span class="dot">·</span>tone</div>
+    <div class="tag">Audio description for your video archive — generated in place, on Backblaze&nbsp;B2.</div>
+  </header>
+  <p class="sub">
+    WCAG requires a spoken description track on prerecorded video. Human describers charge
+    <b>$15–$75 a minute</b>, so archives go undescribed or get deleted. Overtone reads each video
+    <b>out of B2</b>, describes the pauses (reading equations and code aloud, not just naming them),
+    and writes the described master, a WebVTT track, and a provenance manifest <b>back beside the original</b>.
+    Nothing leaves your bucket.
+  </p>
+
+  <div class="status" id="status"></div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Archive · b2://<span id="bkt">…</span></h2>
+      <div class="vid-list" id="videos"><div class="empty">Loading…</div></div>
+    </div>
+    <div class="panel stage" id="stage">
+      <div class="empty">Select a video from the archive to see its description track,<br>or run a live describe on one that isn't done yet.</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    Providers orchestrated by <a href="https://github.com/backblaze-labs/genblaze" target="_blank" rel="noopener">Genblaze</a> ·
+    storage on Backblaze B2 · <a href="https://github.com/JonathanSolvesProblems/overtone" target="_blank" rel="noopener">source</a>
+  </div>
+</div>
+
+<script>
+const $ = (s, r=document) => r.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const fmtT = s => { s = Math.max(0, s||0); const m = Math.floor(s/60), r = Math.floor(s%60); return `${m}:${String(r).padStart(2,'0')}`; };
+
+let VIDEOS = [];
+let CURRENT = null;
+let CUES = [];
+
+async function boot() {
+  try {
+    const h = await (await fetch('/api/health')).json();
+    $('#bkt').textContent = (h.b2 ? '' : 'not configured');
+    const status = $('#status');
+    const add = (label, on) => { const c = el('span', 'chip' + (on ? ' on' : '')); c.innerHTML = label; status.appendChild(c); };
+    add(`Storage <b>Backblaze B2</b>`, h.b2);
+    add(`Speech→text <b>AssemblyAI</b>`, h.stt);
+    add(`Vision <b>${(h.vision[0]||'—').split(':')[0]}</b>`, h.vision.length);
+    add(`Voice <b>${(h.tts[0]||'—').split(':')[0]}</b>`, h.tts.length);
+    add(`Demo budget <b>$${h.budget_remaining_usd}</b> left`, h.budget_remaining_usd > 0);
+  } catch (e) { /* health is best-effort */ }
+  await loadVideos();
+}
+
+async function loadVideos() {
+  const data = await (await fetch('/api/videos')).json();
+  VIDEOS = data.videos;
+  const bktName = document.title; // filled by health; fallback below
+  const list = $('#videos');
+  list.innerHTML = '';
+  if (!VIDEOS.length) { list.appendChild(el('div','empty','No videos under demo/ yet.')); return; }
+  for (const v of VIDEOS) {
+    const b = el('button', 'vid');
+    b.dataset.key = v.key;
+    const short = v.key.replace(/^demo\//,'');
+    const badge = v.described ? '<span class="badge done">described</span>' : '<span class="badge todo">not described</span>';
+    let meta = badge;
+    if (v.described && v.cost_per_minute != null)
+      meta += `<span>$${Number(v.cost_per_minute).toFixed(4)}/min</span>`;
+    if (v.media_seconds) meta += `<span>${fmtT(v.media_seconds)}</span>`;
+    b.innerHTML = `<div class="name">${short}</div><div class="meta">${meta}</div>`;
+    b.onclick = () => selectVideo(v);
+    list.appendChild(b);
+  }
+}
+
+function markActive(key) {
+  document.querySelectorAll('.vid').forEach(b => b.classList.toggle('active', b.dataset.key === key));
+}
+
+async function selectVideo(v) {
+  CURRENT = v; markActive(v.key);
+  if (v.described) renderResult(await (await fetch('/api/result?key=' + encodeURIComponent(v.key))).json());
+  else renderLivePrompt(v);
+}
+
+function renderLivePrompt(v) {
+  const stage = $('#stage'); stage.innerHTML = '';
+  stage.appendChild(el('div', null, `
+    <div style="padding:22px">
+      <div style="font-size:15px;font-weight:600">${v.key.replace(/^demo\//,'')}</div>
+      <p style="color:var(--ink-dim);font-size:13.5px;max-width:520px">
+        This one hasn't been described yet. Run it live: Overtone will read it out of B2, transcribe it,
+        find the pauses, describe each one, fit the narration, mix it in, and write the results back —
+        the same pipeline the CLI runs, on real providers.
+      </p>
+      <button class="btn primary" id="go">Describe live →</button>
+    </div>`));
+  $('#go').onclick = () => runLive(v.key);
+}
+
+function runLive(key) {
+  const stage = $('#stage'); stage.innerHTML = '';
+  const log = el('div', 'live-log');
+  stage.appendChild(log);
+  const line = (html, done) => {
+    const l = el('div', 'live-line', `${done ? '<span class="ok">✓</span>' : '<span class="spinner"></span>'} <span>${html}</span>`);
+    log.appendChild(l); return l;
+  };
+  let current = line('Starting…');
+  const step = (html) => { current.querySelector('.spinner')?.replaceWith(el('span','ok','✓')); current = line(html); };
+
+  const es = new EventSource('/api/describe?key=' + encodeURIComponent(key));
+  es.addEventListener('start', () => step('Reading the video out of B2…'));
+  es.addEventListener('stt.done', e => step(`Transcribed ${JSON.parse(e.data).words} words with timings`));
+  es.addEventListener('gaps.done', e => { const d = JSON.parse(e.data); step(`Found ${d.gaps} describable pauses`); });
+  es.addEventListener('frames.done', e => { const d = JSON.parse(e.data); step(`${d.to_describe} slides to describe (${d.skipped_repeats} repeats skipped)`); });
+  es.addEventListener('described', e => { const d = JSON.parse(e.data); step(`Described pause ${d.gap+1} — ${d.words} words${d.extended?' (extended)':''}`); });
+  es.addEventListener('compose.start', () => step('Mixing descriptions into the audio…'));
+  es.addEventListener('upload.start', () => step('Writing described master + VTT + manifest back to B2…'));
+  es.addEventListener('complete', async e => {
+    current.querySelector('.spinner')?.replaceWith(el('span','ok','✓'));
+    const d = JSON.parse(e.data);
+    line(`Done in ${d.elapsed_seconds}s · ${d.described_count} descriptions · $${d.cost.total.toFixed(4)}`, true);
+    es.close();
+    await loadVideos(); markActive(key);
+    setTimeout(async () => renderResult(await (await fetch('/api/result?key=' + encodeURIComponent(key))).json()), 700);
+  });
+  es.addEventListener('error', e => {
+    let msg = 'Stream error';
+    try { msg = JSON.parse(e.data).message; } catch {}
+    line(`<span style="color:var(--accent)">${msg}</span>`, true);
+    es.close();
+  });
+}
+
+function parseVtt(vtt) {
+  const cues = [];
+  const re = /(\d\d:\d\d:\d\d\.\d\d\d)\s+-->\s+(\d\d:\d\d:\d\d\.\d\d\d).*\n([\s\S]*?)(?=\n\n|\n*$)/g;
+  const toS = t => { const [h,m,s] = t.split(':'); return (+h)*3600 + (+m)*60 + parseFloat(s); };
+  let m;
+  while ((m = re.exec(vtt))) {
+    let text = m[3].trim().replace(/<v[^>]*>/g,'').replace(/<\/v>/g,'');
+    cues.push({ start: toS(m[1]), end: toS(m[2]), text });
+  }
+  return cues;
+}
+
+function renderResult(r) {
+  if (r.error) { $('#stage').innerHTML = `<div class="empty">${r.error}</div>`; return; }
+  CUES = parseVtt(r.vtt);
+  const stage = $('#stage'); stage.innerHTML = '';
+
+  // Player
+  const pw = el('div', 'player-wrap');
+  pw.innerHTML = `
+    <video id="v" controls preload="metadata" src="${r.described_url}"></video>
+    <div class="controls">
+      <div class="toggle" id="tg">
+        <button data-src="${r.described_url}" class="sel">Described (Overtone)</button>
+        <button data-src="${r.original_url}">Original</button>
+      </div>
+      <span style="color:var(--ink-faint);font-size:12px">${r.descriptions.length} descriptions · ${fmtT(r.media_seconds)}</span>
+    </div>`;
+  stage.appendChild(pw);
+
+  // Cards: cost + provenance
+  const cards = el('div', 'cards');
+  const perMin = r.cost_per_minute != null ? Number(r.cost_per_minute) : (r.cost.total / (r.media_seconds/60));
+  cards.appendChild(el('div','card',`
+    <h3>Cost of this description track</h3>
+    <div class="cost-big">$${r.cost.total.toFixed(4)} <span class="unit">· $${perMin.toFixed(4)}/min</span></div>
+    <div class="cost-vs">A human describer: <s>$${r.human_cost_low}–$${r.human_cost_high}</s> &nbsp;→&nbsp; <b>Overtone $${r.cost.total.toFixed(2)}</b></div>`));
+  cards.appendChild(el('div','card',`
+    <h3>Provenance · stored in your bucket</h3>
+    <ul class="provlist prov">
+      <li><span class="k">manifest</span> <span class="h">${(r.manifest_hash||'').slice(0,20)}…</span></li>
+      ${r.output_keys.map(k => `<li><span class="k">b2://${r.bucket}/</span>${k.split('/').pop()}</li>`).join('')}
+      <li><span class="k">providers</span> ${(r.providers||[]).join(', ')}</li>
+    </ul>`));
+  stage.appendChild(cards);
+
+  // Description panel
+  const dp = el('div', 'desc-panel');
+  dp.appendChild(el('h3', null, 'Description track'));
+  CUES.forEach((c, i) => {
+    const ex = r.descriptions[i]?.extended ? '<span class="ex">extended</span>' : '';
+    const cue = el('div', 'cue');
+    cue.id = 'cue' + i;
+    cue.innerHTML = `<span class="t">${fmtT(c.start)}</span><span class="x">${c.text}${ex}</span>`;
+    cue.onclick = () => { const v = $('#v'); if (v) { v.currentTime = c.start + 0.01; v.play(); } };
+    dp.appendChild(cue);
+  });
+  stage.appendChild(dp);
+
+  // Wiring: toggle + live cue highlight
+  const video = $('#v');
+  $('#tg').querySelectorAll('button').forEach(b => b.onclick = () => {
+    const t = video.currentTime, playing = !video.paused;
+    $('#tg').querySelectorAll('button').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel'); video.src = b.dataset.src;
+    video.addEventListener('loadedmetadata', () => { video.currentTime = t; if (playing) video.play(); }, { once: true });
+  });
+  video.addEventListener('timeupdate', () => {
+    const t = video.currentTime;
+    CUES.forEach((c, i) => {
+      const on = t >= c.start && t <= c.end;
+      const node = $('#cue' + i);
+      if (node) node.classList.toggle('live', on);
+    });
+  });
+}
+
+boot();
+</script>
+</body>
+</html>

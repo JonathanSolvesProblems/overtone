@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 from overtone.config import Settings, load
-from overtone.storage import Bucket, already_described, derive_output_keys
+from overtone.storage import Bucket, derive_output_keys
 
 
 def _require_b2(settings: Settings) -> None:
