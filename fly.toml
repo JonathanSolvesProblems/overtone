@@ -32,3 +32,11 @@ primary_region = "iad"   # us-east, close to the B2 us-east-005 bucket
 [[vm]]
   size = "shared-cpu-1x"
   memory = "1gb"
+
+# Mirror the Dockerfile HEALTHCHECK at the platform level.
+[[http_service.checks]]
+  method = "get"
+  path = "/api/health"
+  interval = "30s"
+  timeout = "5s"
+  grace_period = "20s"

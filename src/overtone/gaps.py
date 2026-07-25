@@ -26,9 +26,10 @@ DEFAULT_MIN_GAP = 1.5
 DEFAULT_EDGE_PAD = 0.15
 
 # Narration pace used to convert an available number of seconds into a word
-# budget. Audio description is usually delivered at 150-170 words per minute;
-# 2.6 words/sec (156 wpm) is a deliberately conservative middle.
-DEFAULT_WORDS_PER_SECOND = 2.6
+# budget. Audio description is usually delivered at 150-180 words per minute;
+# 2.9 words/sec (174 wpm) fills the pause without rushing. The fit loop
+# remeasures the rendered audio, so this only sets the first-draft budget.
+DEFAULT_WORDS_PER_SECOND = 2.9
 
 
 class _Timed(Protocol):

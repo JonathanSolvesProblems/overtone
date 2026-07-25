@@ -20,7 +20,12 @@ import threading
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import (
+    FileResponse,
+    HTMLResponse,
+    JSONResponse,
+    StreamingResponse,
+)
 
 from overtone.config import Settings, load
 from overtone.costs import HUMAN_AD_PER_MINUTE_HIGH, HUMAN_AD_PER_MINUTE_LOW
@@ -66,6 +71,11 @@ def _client_id(request: Request) -> str:
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
     return (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+
+
+@app.get("/favicon.svg")
+def favicon() -> FileResponse:
+    return FileResponse(STATIC_DIR / "favicon.svg", media_type="image/svg+xml")
 
 
 @app.get("/api/health")

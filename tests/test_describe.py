@@ -23,14 +23,15 @@ def spec(**kwargs) -> DescriptionSpec:
 
 class TestSystemPrompt:
     def test_forbids_the_stock_openers(self):
-        assert "we see" in SYSTEM_PROMPT
-        assert "the image shows" in SYSTEM_PROMPT
+        assert "We see" in SYSTEM_PROMPT
+        assert "The slide shows" in SYSTEM_PROMPT
+        assert "preamble" in SYSTEM_PROMPT
 
     def test_requires_technical_content_to_be_read_aloud(self):
         # The whole STEM wedge lives in these instructions.
         assert "x squared plus two x minus three equals zero" in SYSTEM_PROMPT
         assert "open paren" in SYSTEM_PROMPT
-        assert "not \"a bar chart is shown\"" in SYSTEM_PROMPT
+        assert 'Not "a chart"' in SYSTEM_PROMPT
 
 
 class TestBuildPrompt:
