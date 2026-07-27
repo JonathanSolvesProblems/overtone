@@ -78,6 +78,11 @@ def favicon() -> FileResponse:
     return FileResponse(STATIC_DIR / "favicon.svg", media_type="image/svg+xml")
 
 
+@app.get("/og.png")
+def og_image() -> FileResponse:
+    return FileResponse(STATIC_DIR / "og.png", media_type="image/png")
+
+
 @app.get("/api/health")
 def health() -> JSONResponse:
     s = settings()
