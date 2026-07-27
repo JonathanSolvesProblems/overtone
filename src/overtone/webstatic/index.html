@@ -207,6 +207,36 @@
   .sk-vid { height: 62px; margin-bottom: 6px; }
   .sk-stage { height: 300px; margin: 18px; }
 
+  /* Brand motion — sound, emitted ------------------------------------- */
+  /* The logo's overtone arcs brighten outward in sequence, like a tone
+     radiating from the fundamental. Slow enough to feel alive, not busy. */
+  .brand .arc { animation: emit 3.4s var(--ease) infinite; }
+  .brand .arc.a1 { --base: 1;    animation-delay: 0s; }
+  .brand .arc.a2 { --base: 0.68; animation-delay: 0.32s; }
+  .brand .arc.a3 { --base: 0.4;  animation-delay: 0.64s; }
+  .brand .core { animation: throb 3.4s var(--ease) infinite; transform-box: fill-box; transform-origin: center; }
+  .brand:hover .arc { animation-duration: 1.6s; }
+  @keyframes emit { 0% { stroke-opacity: var(--base); } 14% { stroke-opacity: 1; } 42%, 100% { stroke-opacity: var(--base); } }
+  @keyframes throb { 0%, 42%, 100% { transform: scale(1); } 11% { transform: scale(1.18); } }
+
+  /* "Now speaking" equalizer on the live cue. */
+  .eq { display: none; }
+  .cue.live .eq { display: inline-flex; gap: 2.5px; align-items: flex-end; height: 13px; width: 18px; margin-right: 9px; vertical-align: -2px; }
+  .eq i { width: 2.6px; border-radius: 2px; background: var(--accent); height: 3px; animation: eq 0.85s ease-in-out infinite; }
+  .eq i:nth-child(2) { animation-delay: 0.18s; }
+  .eq i:nth-child(3) { animation-delay: 0.34s; }
+  .eq i:nth-child(4) { animation-delay: 0.09s; }
+  @keyframes eq { 0%, 100% { height: 3px; } 50% { height: 13px; } }
+
+  /* Ambient waveform in the empty state — an idle sound signature. */
+  .wave { display: inline-flex; align-items: center; gap: 4px; height: 44px; margin-bottom: 20px; }
+  .wave i { width: 4px; border-radius: 3px; background: var(--ink-faint); opacity: 0.55; animation: wave 1.8s ease-in-out infinite; }
+  @keyframes wave { 0%, 100% { height: 8px; } 50% { height: 34px; } }
+
+  /* The header aura breathes, very slowly. */
+  header.masthead::after { animation: breathe 9s ease-in-out infinite; }
+  @keyframes breathe { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
+
   footer { margin-top: 42px; padding-top: 22px; border-top: 1px solid var(--line-soft); color: var(--ink-faint); font-size: 12.5px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; text-align: center; }
   @media (prefers-reduced-motion: reduce) { *, ::before { animation: none !important; transition: none !important; } }
 </style>
@@ -216,10 +246,10 @@
   <header class="masthead">
     <div class="brand">
       <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
-        <circle cx="11" cy="21" r="2.9" fill="#ec6a45"/>
-        <path d="M11 15 A6 6 0 0 1 17 21" stroke="#ec6a45" stroke-width="2.4" stroke-linecap="round"/>
-        <path d="M11 10 A11 11 0 0 1 22 21" stroke="#ec6a45" stroke-width="2.4" stroke-linecap="round" stroke-opacity="0.68"/>
-        <path d="M11 5 A16 16 0 0 1 27 21" stroke="#ec6a45" stroke-width="2.4" stroke-linecap="round" stroke-opacity="0.4"/>
+        <circle class="core" cx="11" cy="21" r="2.9" fill="#ec6a45"/>
+        <path class="arc a1" d="M11 15 A6 6 0 0 1 17 21" stroke="#ec6a45" stroke-width="2.4" stroke-linecap="round"/>
+        <path class="arc a2" d="M11 10 A11 11 0 0 1 22 21" stroke="#ec6a45" stroke-width="2.4" stroke-linecap="round" stroke-opacity="0.68"/>
+        <path class="arc a3" d="M11 5 A16 16 0 0 1 27 21" stroke="#ec6a45" stroke-width="2.4" stroke-linecap="round" stroke-opacity="0.4"/>
       </svg>
       <span class="wordmark">Overtone</span>
     </div>
@@ -241,9 +271,11 @@
 
     <section class="stage" id="stage" aria-live="polite">
       <div class="empty">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M4 5h16v14H4z" stroke-linejoin="round"/><path d="M9 9l6 3-6 3V9z" fill="currentColor" stroke="none"/>
-        </svg>
+        <div class="wave" aria-hidden="true">
+          <i style="animation-delay:0s"></i><i style="animation-delay:.15s"></i><i style="animation-delay:.3s"></i>
+          <i style="animation-delay:.45s"></i><i style="animation-delay:.6s"></i><i style="animation-delay:.45s"></i>
+          <i style="animation-delay:.3s"></i><i style="animation-delay:.15s"></i><i style="animation-delay:0s"></i>
+        </div>
         <p>Pick a lecture from the archive to hear its description track — or run a live describe on one that isn't done yet.</p>
       </div>
     </section>
@@ -427,7 +459,8 @@ function renderResult(r) {
   CUES.forEach((c, i) => {
     const ex = r.descriptions[i] && r.descriptions[i].extended ? '<span class="ex">extended</span>' : "";
     const cue = el("div", "cue"); cue.id = "cue" + i;
-    cue.innerHTML = `<span class="t">${fmtT(c.start)}</span><span class="body">${esc(c.text)}${ex}</span>`;
+    const eq = '<span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>';
+    cue.innerHTML = `<span class="t">${fmtT(c.start)}</span><span class="body">${eq}${esc(c.text)}${ex}</span>`;
     cue.onclick = () => { const v = $("#v"); if (v) { v.currentTime = c.start + 0.01; v.play(); } };
     cuesEl.appendChild(cue);
   });
