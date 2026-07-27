@@ -33,7 +33,7 @@ from genblaze_core.models.chat import (
     TextContent,
 )
 
-from overtone._retry import RATE_LIMIT_RETRIES, is_rate_limit, retry_delay
+from overtone._retry import is_rate_limit, retries_for, retry_delay
 
 logger = logging.getLogger("overtone.vision")
 
@@ -96,6 +96,60 @@ def build_gemini_messages(frames: list[Path], prompt: str) -> list[dict]:
     return [{"role": "user", "parts": parts}]
 
 
+class _TextResponse:
+    """Minimal response shape (``.text``) for the direct Google path."""
+
+    def __init__(self, text: str):
+        self.text = text
+
+
+def _call_google(
+    model: str,
+    frames: list[Path],
+    system: str,
+    prompt: str,
+    *,
+    max_tokens: int,
+    temperature: float,
+) -> _TextResponse:
+    """Describe frames with Gemini via the official ``google-genai`` SDK.
+
+    Deliberately bypasses ``genblaze_google.chat()``: on the pinned 0.3.3
+    connector, a multimodal turn either has its typed image block rejected or,
+    passed as a raw ``parts`` dict, has the image silently dropped during
+    ``ChatMessage`` normalization — so Gemini answers as if blind. The fix I
+    filed (genblaze #194) landed as PR #217 but isn't on PyPI yet; once it
+    releases this can move back to the typed-block ``chat()`` path that every
+    other provider uses. Until then, the official SDK is the reliable route.
+    """
+    import os
+
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY"))
+    contents: list = [prompt]
+    for frame in frames:
+        mime, _ = encode_image(frame)
+        contents.append(types.Part.from_bytes(data=Path(frame).read_bytes(), mime_type=mime))
+
+    # The current Flash models spend output tokens on hidden "thinking" before
+    # answering, and a tight ceiling gets fully consumed by it, leaving empty
+    # text. Give a generous floor so the short description still lands after the
+    # model has thought. (thinking_budget=0 is rejected by this model, so we
+    # make room rather than switch it off.)
+    resp = client.models.generate_content(
+        model=model,
+        contents=contents,
+        config=types.GenerateContentConfig(
+            system_instruction=system,
+            max_output_tokens=max(max_tokens, 640),
+            temperature=temperature,
+        ),
+    )
+    return _TextResponse(text=(resp.text or "").strip())
+
+
 def _call(
     model: VisionModel,
     frames: list[Path],
@@ -107,12 +161,11 @@ def _call(
 ):
     """Dispatch one provider call, translating to that provider's shape."""
     if model.provider == "google":
-        from genblaze_google import chat as google_chat
-
-        return google_chat(
+        return _call_google(
             model.model,
-            messages=build_gemini_messages(frames, prompt),
-            system=system,
+            frames,
+            system,
+            prompt,
             max_tokens=max_tokens,
             temperature=temperature,
         )
@@ -163,9 +216,10 @@ def describe(
     tried: list[str] = []
     last_error: Exception | None = None
 
-    for model in chain:
+    for index, model in enumerate(chain):
+        max_retries = retries_for(is_last_provider=index == len(chain) - 1)
         response = None
-        for attempt in range(RATE_LIMIT_RETRIES + 1):
+        for attempt in range(max_retries + 1):
             try:
                 response = _call(
                     model,
@@ -177,7 +231,7 @@ def describe(
                 )
                 break
             except (ProviderError, Exception) as exc:  # noqa: BLE001
-                if is_rate_limit(exc) and attempt < RATE_LIMIT_RETRIES:
+                if is_rate_limit(exc) and attempt < max_retries:
                     delay = retry_delay(exc, attempt)
                     logger.info("vision %s rate-limited; waiting %.2fs", model, delay)
                     time.sleep(delay)

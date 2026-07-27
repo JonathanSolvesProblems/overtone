@@ -4,7 +4,22 @@ from __future__ import annotations
 
 import pytest
 
-from overtone._retry import is_rate_limit, retry_delay
+from overtone._retry import (
+    RATE_LIMIT_FAILOVER_RETRIES,
+    RATE_LIMIT_RETRIES,
+    is_rate_limit,
+    retries_for,
+    retry_delay,
+)
+
+
+class TestRetriesFor:
+    def test_last_provider_waits_it_out(self):
+        assert retries_for(is_last_provider=True) == RATE_LIMIT_RETRIES
+
+    def test_non_last_provider_fails_over_fast(self):
+        assert retries_for(is_last_provider=False) == RATE_LIMIT_FAILOVER_RETRIES
+        assert RATE_LIMIT_FAILOVER_RETRIES < RATE_LIMIT_RETRIES
 
 
 class TestIsRateLimit:

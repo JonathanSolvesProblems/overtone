@@ -10,10 +10,21 @@ from __future__ import annotations
 
 import re
 
-# Retries per provider on a rate-limit response before failing over. Six
-# escalating waits can span a full tokens-per-minute window, so a sustained
-# ceiling (not just a transient spike) is waited out rather than abandoned.
+# Retries on the LAST provider in a chain: six escalating waits can span a full
+# tokens-per-minute window, so a sustained ceiling is waited out rather than
+# abandoned (there is nowhere else to go).
 RATE_LIMIT_RETRIES = 6
+
+# Retries before failing over when another provider is still available: just one
+# quick attempt, then spill to the next provider. A rate-limited free-tier key
+# should hand off in a second or two, not stall a live request waiting out its
+# window when a paid fallback is sitting right there.
+RATE_LIMIT_FAILOVER_RETRIES = 1
+
+
+def retries_for(is_last_provider: bool) -> int:
+    """How many rate-limit retries to allow before giving up on a provider."""
+    return RATE_LIMIT_RETRIES if is_last_provider else RATE_LIMIT_FAILOVER_RETRIES
 
 # Hard ceiling on any single wait.
 _MAX_DELAY = 30.0

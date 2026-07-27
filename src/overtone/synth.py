@@ -29,8 +29,8 @@ from genblaze_core.models.step import Step
 from genblaze_core.providers.base import ProviderCapabilities, SyncProvider
 from genblaze_core.runnable.config import RunnableConfig
 
-from overtone._retry import RATE_LIMIT_RETRIES as _RATE_LIMIT_RETRIES
 from overtone._retry import is_rate_limit as _is_rate_limit
+from overtone._retry import retries_for as _retries_for
 from overtone._retry import retry_delay as _retry_delay
 from overtone.ffmpeg import audio_duration
 
@@ -136,9 +136,10 @@ def speak(
     tried: list[str] = []
     last_error: Exception | None = None
 
-    for voice in chain:
+    for index, voice in enumerate(chain):
+        max_retries = _retries_for(is_last_provider=index == len(chain) - 1)
         clip = None
-        for attempt in range(_RATE_LIMIT_RETRIES + 1):
+        for attempt in range(max_retries + 1):
             try:
                 provider = _provider_for(voice)
                 step = _make_step(voice, text, output_format)
@@ -149,7 +150,7 @@ def speak(
                 clip = (path, seconds, step)
                 break
             except (ProviderError, Exception) as exc:  # noqa: BLE001
-                if _is_rate_limit(exc) and attempt < _RATE_LIMIT_RETRIES:
+                if _is_rate_limit(exc) and attempt < max_retries:
                     delay = _retry_delay(exc, attempt)
                     logger.info("tts %s rate-limited; waiting %.2fs", voice, delay)
                     time.sleep(delay)

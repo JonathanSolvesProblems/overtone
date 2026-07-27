@@ -71,16 +71,20 @@ class Settings:
 
 # Default model per provider. Kept here rather than scattered through the code
 # so a model bump is a one-line change.
+# "gemini-flash-latest" is a stable alias that tracks Google's current Flash
+# model, so it keeps working as specific versions are retired (a pinned
+# gemini-2.5-flash now 404s for new keys). Vision-capable and free-tier eligible.
 _VISION_DEFAULTS = {
-    "google": "gemini-2.5-flash",
+    "google": "gemini-flash-latest",
     "openai": "gpt-4o-mini",
     "gmicloud": "Qwen/Qwen2.5-VL-7B-Instruct",
 }
 
-# Vision providers are tried in this order when their keys are present. Gemini
-# leads: its free tier makes it the most reproducible for anyone cloning the
-# repo, and the adapter already smooths over its multimodal quirk.
-_VISION_PRIORITY = ("google", "openai", "gmicloud")
+# Vision providers are tried in this order when their keys are present. OpenAI
+# leads because it is the reliable, higher-limit path for a live request; the
+# free Gemini tier sits behind it as a no-cost fallback that also absorbs
+# spillover when OpenAI hits its own per-minute ceiling on a big run.
+_VISION_PRIORITY = ("openai", "google", "gmicloud")
 
 
 def _present_vars() -> set[str]:
