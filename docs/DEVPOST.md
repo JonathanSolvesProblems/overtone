@@ -132,8 +132,20 @@ integration and a fit loop proven to converge against a mock provider.
   couldn't tell two equations apart (4 bits different); a difference hash could
   (21 bits). That switch is what makes archive-scale cost real.
 - **Cross-provider vision.** The canonical multimodal block works on the
-  OpenAI-wire connectors but is rejected by the Google one; I filed the bug and
-  wrote an adapter so all three providers work behind one call.
+  OpenAI-wire connectors but was rejected by the Google one; I wrote an adapter
+  so all three providers work behind one call, and filed the bug upstream
+  ([genblaze #194](https://github.com/backblaze-labs/genblaze/issues/194)). The
+  maintainers merged a fix implementing exactly the translation I proposed
+  ([PR #217](https://github.com/backblaze-labs/genblaze/pull/217)), so Gemini
+  vision now works with the canonical blocks in the SDK itself.
+
+## Platform engagement
+
+Building on a days-old SDK surfaced real issues, and I fed them back. Two filed:
+the Gemini multimodal rejection (**#194**, since **merged** as PR #217) and a
+request to export the deterministic-provider ffmpeg helpers that already exist
+privately (**#195**). One of my two pieces of feedback shipped in genblaze during
+the hackathon.
 
 ## What's next
 

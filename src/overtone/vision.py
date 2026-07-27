@@ -5,11 +5,12 @@ and for text-only chat that holds. For vision it does not, so this module
 absorbs the difference.
 
 The canonical ``ImageURLContent`` block works on OpenAI-wire connectors
-(OpenAI, GMI Cloud). ``genblaze-google`` rejects it, and the raw-dict workaround
-its own error message recommends is rejected identically. Gemini vision is
-reachable, but only through a raw dict in Gemini's native ``parts`` /
-``inline_data`` shape. Verified against genblaze-google 0.3.3 and filed
-upstream.
+(OpenAI, GMI Cloud). ``genblaze-google`` 0.3.3 rejected it, and the raw-dict
+workaround its own error message recommended was rejected identically, so Gemini
+vision was only reachable through a raw dict in Gemini's native ``parts`` /
+``inline_data`` shape. Filed upstream as genblaze #194 and since fixed in PR
+#217 (which added the same translation this adapter does); the raw-Gemini path
+below still works and keeps compatibility with the pinned 0.3.x connector.
 
 Keeping that knowledge here means the rest of Overtone asks for a description
 and never learns which vendor answered.
