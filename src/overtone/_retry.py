@@ -4,6 +4,11 @@ Archive-scale runs hit provider tokens-per-minute ceilings routinely. The right
 response is to wait the moment the provider asks for and try again, not to
 abandon the run or immediately burn a fallback provider. Vision and TTS both
 use these.
+
+Note: genblaze added opt-in rate-limit backoff to the chat()/vision helpers in
+PR #229 (from issue #221, filed while building this). Once that lands on PyPI,
+the per-provider retry here can defer to it — but pass the SDK flag *or* keep
+this loop, never both, to avoid double backoff.
 """
 
 from __future__ import annotations

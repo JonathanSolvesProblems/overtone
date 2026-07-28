@@ -141,11 +141,21 @@ integration and a fit loop proven to converge against a mock provider.
 
 ## Platform engagement
 
-Building on a days-old SDK surfaced real issues, and I fed them back. Two filed:
-the Gemini multimodal rejection (**#194**, since **merged** as PR #217) and a
-request to export the deterministic-provider ffmpeg helpers that already exist
-privately (**#195**). One of my two pieces of feedback shipped in genblaze during
-the hackathon.
+Building on a days-old SDK surfaced real issues, and I fed them back — **three
+filed, two already merged into genblaze during the hackathon**, each implementing
+what the issue proposed:
+
+- **#194 → merged (PR #217).** The Google connector rejected the canonical
+  multimodal block, so vision wasn't provider-swappable the way the SDK promises.
+- **#221 → merged (PR #229).** The standalone `chat()` / vision helpers parsed a
+  rate-limit hint but raised instead of acting on it, so image-heavy loops died
+  on tier-limited keys. The fix added opt-in rate-limit backoff. I found this the
+  hard way — describing a real MIT lecture, my run hit exactly this and I had to
+  wrap the helper in an escalating backoff to survive.
+- **#195 → open.** Export the private deterministic-provider ffmpeg helpers so
+  custom media steps don't re-implement (and mis-secure) input handling.
+
+Two of three pieces of feedback shipped in the SDK before the deadline.
 
 ## What's next
 

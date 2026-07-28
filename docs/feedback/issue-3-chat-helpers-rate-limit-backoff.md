@@ -1,5 +1,9 @@
 # Standalone `chat()` helpers surface `retry_after` but don't back off on 429, so image-heavy vision loops die on tier-limited keys
 
+> **Resolved:** filed as genblaze #221 and merged as PR #229, which added opt-in
+> rate-limit backoff to the `chat()` / vision helpers (plus a follow-up to
+> disable SDK-internal retry when the caller manages backoff).
+
 **Type:** Feature request (developer experience / production reliability)
 **Affects:** `genblaze-openai` 0.3.3, `genblaze-google` 0.3.3 (the standalone `chat()` / `achat()` helpers)
 
