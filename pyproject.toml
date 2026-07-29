@@ -4,15 +4,17 @@ version = "0.1.0"
 description = "Generate WCAG audio description tracks for a video archive, in place, on Backblaze B2."
 requires-python = ">=3.11"
 dependencies = [
-    "genblaze==0.4.4",
-    "genblaze-core>=0.3.7",
+    "genblaze==0.4.5",
+    "genblaze-core>=0.3.8",
     "genblaze-s3>=0.3.6",
-    "genblaze-assemblyai>=0.3.1",
-    "genblaze-hume>=0.3.2",
-    "genblaze-elevenlabs>=0.3.2",
-    "genblaze-google>=0.3.3",
-    "genblaze-openai>=0.3.3",
-    "genblaze-gmicloud>=0.3.4",
+    "genblaze-assemblyai>=0.3.2",
+    "genblaze-hume>=0.3.3",
+    "genblaze-elevenlabs>=0.3.3",
+    # 0.3.4 ships the fix for genblaze #194: Gemini now accepts the canonical
+    # multimodal blocks, so all vision providers share one code path.
+    "genblaze-google>=0.3.4",
+    "genblaze-openai>=0.3.4",
+    "genblaze-gmicloud>=0.3.5",
 ]
 
 [project.optional-dependencies]

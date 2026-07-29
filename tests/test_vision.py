@@ -15,8 +15,7 @@ from genblaze_core.models.chat import ChatMessage, ImageURLContent, TextContent
 from overtone import vision
 from overtone.vision import (
     VisionModel,
-    build_gemini_messages,
-    build_openai_messages,
+    build_messages,
     describe,
     encode_image,
 )
@@ -55,49 +54,32 @@ class TestEncoding:
         assert encode_image(odd)[0] == "image/jpeg"
 
 
-class TestOpenAIShape:
+class TestMessageShape:
     def test_prompt_comes_first(self, frames):
-        blocks = build_openai_messages(frames, "Describe.")[0].content
+        blocks = build_messages(frames, "Describe.")[0].content
         assert isinstance(blocks[0], TextContent)
         assert blocks[0].text == "Describe."
 
     def test_every_frame_becomes_an_image_block(self, frames):
-        blocks = build_openai_messages(frames, "Describe.")[0].content
+        blocks = build_messages(frames, "Describe.")[0].content
         images = [b for b in blocks if isinstance(b, ImageURLContent)]
         assert len(images) == len(frames)
 
     def test_images_are_data_uris(self, frames):
-        blocks = build_openai_messages(frames, "Describe.")[0].content
+        blocks = build_messages(frames, "Describe.")[0].content
         image = next(b for b in blocks if isinstance(b, ImageURLContent))
         assert image.image_url.url.startswith("data:image/jpeg;base64,")
 
     def test_returns_a_single_user_turn(self, frames):
-        messages = build_openai_messages(frames, "Describe.")
+        messages = build_messages(frames, "Describe.")
         assert len(messages) == 1
         assert isinstance(messages[0], ChatMessage)
         assert messages[0].role == "user"
 
-
-class TestGeminiShape:
-    def test_uses_raw_dicts_not_chat_messages(self, frames):
-        # Typed blocks are rejected by genblaze-google, so this must stay raw.
-        messages = build_gemini_messages(frames, "Describe.")
-        assert isinstance(messages[0], dict)
-
-    def test_uses_native_parts_and_inline_data(self, frames):
-        parts = build_gemini_messages(frames, "Describe.")[0]["parts"]
-        assert parts[0] == {"text": "Describe."}
-        assert set(parts[1]["inline_data"]) == {"mime_type", "data"}
-
-    def test_inline_data_is_bare_base64_not_a_data_uri(self, frames):
-        # Gemini wants the payload alone; a data: prefix silently breaks it.
-        payload = build_gemini_messages(frames, "Describe.")[0]["parts"][1]["inline_data"]["data"]
-        assert not payload.startswith("data:")
-        assert base64.b64decode(payload) == PIXEL
-
-    def test_one_part_per_frame_plus_the_prompt(self, frames):
-        parts = build_gemini_messages(frames, "Describe.")[0]["parts"]
-        assert len(parts) == len(frames) + 1
+    def test_one_canonical_shape_for_every_provider(self, frames):
+        # Google reaching parity (genblaze #194 / PR #217) means there is no
+        # longer a separate per-vendor message builder.
+        assert not hasattr(vision, "build_gemini_messages")
 
 
 class FakeResponse:

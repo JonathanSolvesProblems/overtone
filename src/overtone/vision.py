@@ -1,19 +1,14 @@
 """Provider-agnostic multimodal description calls.
 
-Genblaze's promise is that you swap providers without rewriting orchestration,
-and for text-only chat that holds. For vision it does not, so this module
-absorbs the difference.
+Genblaze's promise is that you swap vision providers without rewriting
+orchestration, and as of genblaze-google 0.3.4 that finally holds for images
+too: every provider here takes the same canonical ``ImageURLContent`` blocks
+through its ``chat()`` helper. Google reaching parity came from a bug this
+project filed (genblaze #194, shipped as PR #217), so the one path below now
+works for OpenAI, Gemini, and GMI Cloud alike.
 
-The canonical ``ImageURLContent`` block works on OpenAI-wire connectors
-(OpenAI, GMI Cloud). ``genblaze-google`` 0.3.3 rejected it, and the raw-dict
-workaround its own error message recommended was rejected identically, so Gemini
-vision was only reachable through a raw dict in Gemini's native ``parts`` /
-``inline_data`` shape. Filed upstream as genblaze #194 and since fixed in PR
-#217 (which added the same translation this adapter does); the raw-Gemini path
-below still works and keeps compatibility with the pinned 0.3.x connector.
-
-Keeping that knowledge here means the rest of Overtone asks for a description
-and never learns which vendor answered.
+Keeping that behind one function means the rest of Overtone asks for a
+description and never learns which vendor answered.
 """
 
 from __future__ import annotations
@@ -36,10 +31,6 @@ from genblaze_core.models.chat import (
 from overtone._retry import is_rate_limit, retries_for, retry_delay
 
 logger = logging.getLogger("overtone.vision")
-
-# Connectors whose chat() speaks the OpenAI wire shape and therefore accept
-# the canonical typed content blocks.
-OPENAI_WIRE = frozenset({"openai", "gmicloud"})
 
 
 @dataclass(frozen=True)
@@ -71,8 +62,12 @@ def encode_image(path: str | Path) -> tuple[str, str]:
     return mime, base64.b64encode(path.read_bytes()).decode("ascii")
 
 
-def build_openai_messages(frames: list[Path], prompt: str) -> list[ChatMessage]:
-    """Build a typed multimodal turn for OpenAI-wire connectors."""
+def build_messages(frames: list[Path], prompt: str) -> list[ChatMessage]:
+    """Build a canonical multimodal turn: a text block plus one image per frame.
+
+    The same typed ``ImageURLContent`` blocks are accepted by every vision
+    connector now, so there is one message shape rather than one per vendor.
+    """
     blocks: list = [TextContent(text=prompt)]
     for frame in frames:
         mime, payload = encode_image(frame)
@@ -82,72 +77,21 @@ def build_openai_messages(frames: list[Path], prompt: str) -> list[ChatMessage]:
     return [ChatMessage(role="user", content=blocks)]
 
 
-def build_gemini_messages(frames: list[Path], prompt: str) -> list[dict]:
-    """Build a raw Gemini turn using native ``parts`` and ``inline_data``.
+def _chat_for(provider: str):
+    """Return the Genblaze ``chat()`` helper for a vision provider."""
+    if provider == "openai":
+        from genblaze_openai import chat
 
-    Deliberately a raw dict. Passing typed blocks, or the OpenAI-shaped raw
-    dict the connector's error message suggests, both raise before any request
-    is made.
-    """
-    parts: list[dict] = [{"text": prompt}]
-    for frame in frames:
-        mime, payload = encode_image(frame)
-        parts.append({"inline_data": {"mime_type": mime, "data": payload}})
-    return [{"role": "user", "parts": parts}]
+        return chat
+    if provider == "google":
+        from genblaze_google import chat
 
+        return chat
+    if provider == "gmicloud":
+        from genblaze_gmicloud import chat
 
-class _TextResponse:
-    """Minimal response shape (``.text``) for the direct Google path."""
-
-    def __init__(self, text: str):
-        self.text = text
-
-
-def _call_google(
-    model: str,
-    frames: list[Path],
-    system: str,
-    prompt: str,
-    *,
-    max_tokens: int,
-    temperature: float,
-) -> _TextResponse:
-    """Describe frames with Gemini via the official ``google-genai`` SDK.
-
-    Deliberately bypasses ``genblaze_google.chat()``: on the pinned 0.3.3
-    connector, a multimodal turn either has its typed image block rejected or,
-    passed as a raw ``parts`` dict, has the image silently dropped during
-    ``ChatMessage`` normalization — so Gemini answers as if blind. The fix I
-    filed (genblaze #194) landed as PR #217 but isn't on PyPI yet; once it
-    releases this can move back to the typed-block ``chat()`` path that every
-    other provider uses. Until then, the official SDK is the reliable route.
-    """
-    import os
-
-    from google import genai
-    from google.genai import types
-
-    client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY"))
-    contents: list = [prompt]
-    for frame in frames:
-        mime, _ = encode_image(frame)
-        contents.append(types.Part.from_bytes(data=Path(frame).read_bytes(), mime_type=mime))
-
-    # The current Flash models spend output tokens on hidden "thinking" before
-    # answering, and a tight ceiling gets fully consumed by it, leaving empty
-    # text. Give a generous floor so the short description still lands after the
-    # model has thought. (thinking_budget=0 is rejected by this model, so we
-    # make room rather than switch it off.)
-    resp = client.models.generate_content(
-        model=model,
-        contents=contents,
-        config=types.GenerateContentConfig(
-            system_instruction=system,
-            max_output_tokens=max(max_tokens, 640),
-            temperature=temperature,
-        ),
-    )
-    return _TextResponse(text=(resp.text or "").strip())
+        return chat
+    raise ValueError(f"Unknown vision provider: {provider}")
 
 
 def _call(
@@ -159,40 +103,19 @@ def _call(
     max_tokens: int,
     temperature: float,
 ):
-    """Dispatch one provider call, translating to that provider's shape."""
-    if model.provider == "google":
-        return _call_google(
-            model.model,
-            frames,
-            system,
-            prompt,
-            max_tokens=max_tokens,
-            temperature=temperature,
-        )
+    """Describe frames with one provider, via its Genblaze ``chat()`` helper.
 
-    if model.provider == "openai":
-        from genblaze_openai import chat as openai_chat
-
-        return openai_chat(
-            model.model,
-            messages=build_openai_messages(frames, prompt),
-            system=system,
-            max_tokens=max_tokens,
-            temperature=temperature,
-        )
-
-    if model.provider == "gmicloud":
-        from genblaze_gmicloud import chat as gmi_chat
-
-        return gmi_chat(
-            model.model,
-            messages=build_openai_messages(frames, prompt),
-            system=system,
-            max_tokens=max_tokens,
-            temperature=temperature,
-        )
-
-    raise ValueError(f"Unknown vision provider: {model.provider}")
+    Every provider takes the identical canonical message; the only per-provider
+    knowledge left is which ``chat()`` to import.
+    """
+    chat = _chat_for(model.provider)
+    return chat(
+        model.model,
+        messages=build_messages(frames, prompt),
+        system=system,
+        max_tokens=max_tokens,
+        temperature=temperature,
+    )
 
 
 def describe(
