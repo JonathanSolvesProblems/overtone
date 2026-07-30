@@ -21,6 +21,10 @@ out/
 *.m4a
 !tests/fixtures/**
 
+# Submission draft and generated upload assets (local only)
+SUBMISSION.md
+/thumbnail.png
+
 # OS
 Thumbs.db
 .DS_Store
