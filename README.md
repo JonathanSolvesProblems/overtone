@@ -19,7 +19,7 @@ FERPA-covered recordings never leave the storage you already trust.
 
 **Measured on real footage:** a 3-minute segment of an actual MIT OpenCourseWare
 lecture (18.03 Differential Equations, a chalkboard class) cost **$0.08 to
-describe — about $0.03 per finished minute** end to end, against a human
+describe, about $0.03 per finished minute** end to end, against a human
 describer's **$15–$75**. Most of that is the ElevenLabs voice; swapping to OpenAI
 TTS at archive scale brings it closer to a cent a minute. Either way it is three
 to four orders of magnitude cheaper than a person.
@@ -74,7 +74,7 @@ For each video:
    hold a useful phrase), merging overlapping speakers so a gap is never
    invented where two people talk at once.
 4. **Sample keyframes** for each pause, using a difference hash to **skip slides
-   that have not changed** — a slide held for five minutes is described once,
+   that have not changed**: a slide held for five minutes is described once,
    not eight times.
 5. **Describe** each new pause with a vision model, in a prompt that reads
    technical content aloud, sized to the length of the pause.

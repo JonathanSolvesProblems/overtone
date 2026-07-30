@@ -1,11 +1,11 @@
-# Overtone — Devpost submission
+# Overtone: Devpost submission
 
 > Audio description for a video archive, generated in place, on Backblaze B2.
 
 ## Elevator pitch
 
 It's like the audio-description services universities already pay for (3Play,
-Verbit) — except it runs across your entire B2 archive for a fraction of a cent
+Verbit), except it runs across your entire B2 archive for a fraction of a cent
 a minute instead of $15–$75, and it never makes you upload a thing.
 
 ## The problem
@@ -31,7 +31,7 @@ already described, it:
 2. transcribes it (AssemblyAI) to get word-level timings,
 3. finds the pauses a describer would speak into,
 4. samples keyframes, skipping slides that haven't changed,
-5. **describes each pause** with a vision model — reading equations and code
+5. **describes each pause** with a vision model, reading equations and code
    *aloud* ("y equals m x plus b", not "an equation is shown"),
 6. **fits** the narration to the pause: speak it, measure it, and if it ran long,
    rewrite it shorter (a Genblaze `AgentLoop`),
@@ -45,7 +45,7 @@ Nothing leaves your storage. FERPA-covered recordings never go to a vendor.
 ## The one number
 
 Measured, not projected: a 3-minute segment of a real MIT OpenCourseWare lecture
-(18.03 Differential Equations) cost **$0.08 to describe — about $0.03 per finished
+(18.03 Differential Equations) cost **$0.08 to describe, about $0.03 per finished
 minute** end to end, against a human describer's **$15–$75**. The pipeline read
 the board ("A line extends from the point labeled x y upward"), found 8
 describable pauses, and wrote the results back to B2. Most of the cost is the
@@ -97,7 +97,7 @@ Genblaze orchestrates every generative step:
 - **Storage:** `genblaze-s3` `S3StorageBackend` and durable/presigned URL
   handling for B2.
 - **AgentLoop:** the generate → evaluate → retry loop that fits each description
-  to its pause — exactly the "agentic pipelines that generate, evaluate, retry,
+  to its pause, exactly the "agentic pipelines that generate, evaluate, retry,
   and store outputs" the brief calls for.
 - **Manifest:** a hash-verified provenance document recording how every output
   was produced, written to B2 as the resume marker.
@@ -141,7 +141,7 @@ integration and a fit loop proven to converge against a mock provider.
 
 ## Platform engagement
 
-Building on a days-old SDK surfaced real issues, and I fed them back — **three
+Building on a days-old SDK surfaced real issues, and I fed them back. **Three
 filed, two already merged into genblaze during the hackathon**, each implementing
 what the issue proposed:
 
@@ -150,7 +150,7 @@ what the issue proposed:
 - **#221 → merged (PR #229).** The standalone `chat()` / vision helpers parsed a
   rate-limit hint but raised instead of acting on it, so image-heavy loops died
   on tier-limited keys. The fix added opt-in rate-limit backoff. I found this the
-  hard way — describing a real MIT lecture, my run hit exactly this and I had to
+  hard way, describing a real MIT lecture: my run hit exactly this and I had to
   wrap the helper in an escalating backoff to survive.
 - **#195 → open.** Export the private deterministic-provider ffmpeg helpers so
   custom media steps don't re-implement (and mis-secure) input handling.
