@@ -248,6 +248,12 @@
   .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
   .reveal.in { opacity: 1; transform: none; }
 
+  .byoa { margin-top: 20px; }
+  .byoa p { color: var(--ink-dim); max-width: 68ch; line-height: 1.66; }
+  .byoa p strong { color: var(--ink); font-weight: 600; }
+  .codeblock { background: var(--bg-2); border: 1px solid var(--line-soft); border-radius: var(--r); padding: 18px 20px; font-family: var(--mono); font-size: 13px; line-height: 1.95; color: var(--ink-dim); overflow-x: auto; margin: 20px 0; white-space: pre; }
+  .codeblock .c { color: var(--ink-faint); } .codeblock .p { color: var(--accent); }
+
   footer { margin-top: 64px; padding: 26px 0 60px; border-top: 1px solid var(--line-soft); color: var(--ink-faint); font-size: 12.5px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; text-align: center; }
 
   @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation: none !important; transition: none !important; } .reveal { opacity: 1; transform: none; } }
@@ -329,6 +335,25 @@
       </div>
     </section>
   </main>
+
+  <section class="byoa reveal">
+    <div class="sec-head">
+      <h2>Run it on your own archive</h2>
+      <span class="hint">the demo above is a live window into a real tool</span>
+    </div>
+    <p>
+      These lectures live in one curated Backblaze bucket so you can try it in the browser. The tool
+      itself is a small Python package and CLI that runs against <strong>any B2 bucket, at archive
+      scale</strong>. Point it at a prefix and it describes every video that isn't already done, resuming
+      safely, so a re-run over ten thousand lectures is cheap.
+    </p>
+    <div class="codeblock" aria-label="command line usage"><span class="c"># Python 3.11+ and ffmpeg. Put your B2 + provider keys in .env, then:</span>
+<span class="p">overtone doctor</span>                     <span class="c"># check what's configured</span>
+<span class="p">overtone scan</span> lectures/              <span class="c"># what's describable, and what's done</span>
+<span class="p">overtone describe</span> lectures/week3.mp4  <span class="c"># one video, in place on B2</span>
+<span class="p">overtone archive</span> lectures/           <span class="c"># the whole prefix, with resume</span></div>
+    <a class="btn ghost" href="https://github.com/JonathanSolvesProblems/overtone#readme" target="_blank" rel="noopener">Read the setup</a>
+  </section>
 
   <footer>
     <div style="width:100%;display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
