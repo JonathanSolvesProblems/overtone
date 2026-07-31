@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Overtone — audio description for your archive, in place on B2</title>
 <meta name="description" content="Overtone generates WCAG audio-description tracks for a whole video archive, in place on Backblaze B2. It reads equations and code aloud, fits each description to the pause, and writes the described master back beside the original." />
-<meta name="theme-color" content="#0c0e13" />
+<meta name="theme-color" content="#0b0d12" />
 <meta property="og:title" content="Overtone — audio description for your archive, on Backblaze B2" />
 <meta property="og:description" content="Generates WCAG audio-description tracks for a whole video archive, in place on B2. Reads equations and code aloud. ~$0.03/min vs $15–75 for a human describer." />
 <meta property="og:type" content="website" />
@@ -14,116 +14,166 @@
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Overtone — audio description for your archive, on Backblaze B2" />
-<meta name="twitter:description" content="WCAG audio description for a whole archive, in place on B2. ~$0.03/min vs $15–75 human." />
 <meta name="twitter:image" content="https://overtone.jonathanandrei.com/og.png" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #0c0e13;
-    --bg-tint: #11141c;
+    --bg: #0b0d12;
+    --bg-2: #0e1118;
     --panel: #14171f;
     --panel-2: #171b24;
+    --glass: rgba(22, 26, 35, 0.55);
     --line: #242a36;
-    --line-soft: #1d222c;
-    --ink: #eef1f7;
-    --ink-dim: #9aa6bd;
+    --line-soft: #1c212b;
+    --ink: #f0f3f9;
+    --ink-dim: #9caabf;
     --ink-faint: #64708a;
     --accent: #ec6a45;
-    --accent-ink: #1c0f09;
+    --accent-2: #f0885f;
+    --accent-ink: #1b0e08;
     --accent-soft: rgba(236, 106, 69, 0.14);
     --good: #5bbf8a;
-    --shadow: 0 18px 40px -24px rgba(6, 9, 16, 0.9), 0 2px 8px -4px rgba(0, 0, 0, 0.5);
-    --shadow-accent: 0 20px 50px -30px rgba(236, 106, 69, 0.4);
-    --radius-lg: 18px;
-    --radius: 13px;
-    --radius-sm: 9px;
+    --shadow: 0 24px 60px -32px rgba(4, 7, 13, 0.95), 0 2px 10px -4px rgba(0, 0, 0, 0.55);
+    --shadow-accent: 0 24px 70px -34px rgba(236, 106, 69, 0.45);
+    --r-lg: 20px; --r: 14px; --r-sm: 10px;
     --display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
     --sans: "Manrope", ui-sans-serif, system-ui, -apple-system, sans-serif;
     --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
     --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --maxw: 1180px;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 15px;
-    line-height: 1.55;
-    font-variant-numeric: tabular-nums;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); font-size: 15.5px; line-height: 1.6;
+    font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility; overflow-x: hidden;
   }
-  /* Grain overlay — breaks the digital flatness, very subtle. */
+  /* Ambient background: two slow-drifting coral auras + fixed grain. */
   body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.025;
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(60vw 42vw at 78% -8%, rgba(236, 106, 69, 0.10), transparent 60%),
+      radial-gradient(46vw 40vw at 8% 12%, rgba(76, 120, 200, 0.06), transparent 62%);
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.022;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; text-underline-offset: 3px; }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 5px; }
+  .wrap { position: relative; z-index: 1; max-width: var(--maxw); margin: 0 auto; padding: 0 26px; }
 
-  .wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 40px 26px 96px; }
-
-  /* Masthead ---------------------------------------------------------- */
-  header.masthead { position: relative; margin-bottom: 30px; }
-  header.masthead::after {
-    content: "";
-    position: absolute;
-    top: -120px; left: -80px; right: -80px; height: 340px;
-    z-index: -1;
-    background: radial-gradient(680px 240px at 22% 0%, rgba(236, 106, 69, 0.10), transparent 70%);
-    pointer-events: none;
+  /* Nav ---------------------------------------------------------------- */
+  nav.top {
+    position: sticky; top: 0; z-index: 20;
+    backdrop-filter: blur(14px) saturate(1.2); -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    background: linear-gradient(180deg, rgba(11,13,18,0.86), rgba(11,13,18,0.55));
+    border-bottom: 1px solid var(--line-soft);
   }
-  .brand { display: flex; align-items: center; gap: 13px; }
-  .brand svg { width: 34px; height: 34px; display: block; }
-  .wordmark { font-family: var(--display); font-weight: 700; font-size: 25px; letter-spacing: -0.02em; }
-  .lede { margin: 20px 0 0; max-width: 62ch; color: var(--ink-dim); font-size: 15.5px; line-height: 1.6; text-wrap: pretty; }
-  .lede strong { color: var(--ink); font-weight: 600; }
+  .nav-in { max-width: var(--maxw); margin: 0 auto; padding: 13px 26px; display: flex; align-items: center; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 11px; }
+  .brand svg { width: 30px; height: 30px; display: block; }
+  .wordmark { font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: -0.02em; }
+  .nav-spacer { flex: 1; }
+  .live-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ink-dim);
+    font-family: var(--mono); padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); }
+  .live-pill .led { width: 6px; height: 6px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px rgba(91,191,138,0.16); animation: pulse 2.4s var(--ease) infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+  .nav-link { font-size: 13.5px; color: var(--ink-dim); font-weight: 600; }
+  .nav-link:hover { color: var(--ink); text-decoration: none; }
 
-  /* Provider status --------------------------------------------------- */
-  .status { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 22px; }
-  .chip {
-    display: inline-flex; align-items: center; gap: 7px;
-    font-size: 12px; color: var(--ink-dim);
-    padding: 5px 11px 5px 9px; border-radius: 999px;
-    background: var(--panel); border: 1px solid var(--line-soft);
+  /* Logo motion -------------------------------------------------------- */
+  .arc { animation: emit 3.4s var(--ease) infinite; }
+  .arc.a1 { --base: 1; animation-delay: 0s; } .arc.a2 { --base: 0.68; animation-delay: 0.32s; } .arc.a3 { --base: 0.4; animation-delay: 0.64s; }
+  .core { animation: throb 3.4s var(--ease) infinite; transform-box: fill-box; transform-origin: center; }
+  .brand:hover .arc { animation-duration: 1.6s; }
+  @keyframes emit { 0%{stroke-opacity:var(--base)} 14%{stroke-opacity:1} 42%,100%{stroke-opacity:var(--base)} }
+  @keyframes throb { 0%,42%,100%{transform:scale(1)} 11%{transform:scale(1.18)} }
+
+  /* Hero --------------------------------------------------------------- */
+  .hero { padding: 76px 0 40px; }
+  .eyebrow { font-family: var(--mono); font-size: 12.5px; color: var(--accent); letter-spacing: 0.02em; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 9px; }
+  .eyebrow::before { content: ""; width: 22px; height: 1px; background: var(--accent); opacity: 0.6; }
+  h1.hero-title {
+    font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; line-height: 1.03;
+    font-size: clamp(38px, 6.2vw, 74px); margin: 0 0 22px; max-width: 15ch; text-wrap: balance;
   }
+  h1.hero-title .dim { color: var(--ink-faint); }
+  .hero-sub { font-size: clamp(16px, 1.5vw, 19px); color: var(--ink-dim); max-width: 60ch; line-height: 1.62; margin: 0 0 32px; text-wrap: pretty; }
+  .hero-sub strong { color: var(--ink); font-weight: 600; }
+  .hero-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 40px; align-items: center; }
+  @media (max-width: 880px) { .hero-grid { grid-template-columns: 1fr; gap: 30px; } }
+
+  .cta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 26px; }
+  .btn {
+    font: inherit; font-family: var(--display); font-size: 14.5px; font-weight: 600;
+    border-radius: 11px; padding: 13px 22px; cursor: pointer; display: inline-flex; align-items: center; gap: 9px;
+    border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+    transition: transform 0.18s var(--ease), box-shadow 0.22s var(--ease), filter 0.2s var(--ease);
+  }
+  .btn:hover { filter: brightness(1.06); box-shadow: var(--shadow-accent); transform: translateY(-2px); text-decoration: none; }
+  .btn:active { transform: translateY(0); filter: brightness(0.97); }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .btn.ghost:hover { border-color: var(--accent); box-shadow: none; }
+  .btn .arrow { transition: transform 0.2s var(--ease); }
+  .btn:hover .arrow { transform: translateY(2px); }
+
+  .status { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ink-dim);
+    padding: 5px 11px 5px 9px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line-soft); }
   .chip .led { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-faint); }
-  .chip.on .led { background: var(--good); box-shadow: 0 0 0 3px rgba(91, 191, 138, 0.15); }
+  .chip.on .led { background: var(--good); box-shadow: 0 0 0 3px rgba(91,191,138,0.15); }
   .chip b { color: var(--ink); font-weight: 600; font-family: var(--display); }
 
-  /* Layout ------------------------------------------------------------ */
-  .grid { display: grid; grid-template-columns: 322px 1fr; gap: 24px; align-items: start; margin-top: 34px; }
-  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-
-  .section-label {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
-    color: var(--ink-faint); text-transform: none;
-    padding: 2px 4px; margin: 0 0 14px;
+  /* Hero visual: cost stat over a living waveform ---------------------- */
+  .hero-viz { position: relative; }
+  .stat-card {
+    position: relative; z-index: 2; background: var(--glass);
+    backdrop-filter: blur(16px) saturate(1.3); -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    border: 1px solid var(--line); border-radius: var(--r-lg); padding: 26px 26px 22px;
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.04);
   }
+  .stat-label { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); margin-bottom: 10px; }
+  .stat-big { font-family: var(--display); font-weight: 700; font-size: 52px; letter-spacing: -0.03em; line-height: 1; }
+  .stat-big .u { font-size: 18px; color: var(--ink-dim); font-weight: 500; letter-spacing: 0; }
+  .stat-vs { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line-soft); font-size: 14px; color: var(--ink-dim); display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+  .stat-vs .human { color: var(--ink-faint); text-decoration: line-through; text-decoration-thickness: 1px; }
+  .stat-vs .arr { color: var(--ink-faint); }
+  .stat-vs .ours { color: var(--good); font-family: var(--display); font-weight: 600; }
+  .wave { display: flex; align-items: center; justify-content: center; gap: 3px; height: 60px; margin-top: 18px; }
+  .wave i { width: 4px; border-radius: 3px; background: linear-gradient(var(--accent), var(--accent-2)); opacity: 0.85; animation: wv 1.7s ease-in-out infinite; }
+  @keyframes wv { 0%,100%{height:8px; opacity:0.5} 50%{height:46px; opacity:0.95} }
+
+  /* Steps strip -------------------------------------------------------- */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 26px 0 8px; }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr 1fr; } }
+  .step { background: var(--panel); border: 1px solid var(--line-soft); border-radius: var(--r); padding: 16px 16px 15px; }
+  .step .n { font-family: var(--mono); font-size: 11px; color: var(--accent); margin-bottom: 9px; }
+  .step .t { font-family: var(--display); font-weight: 600; font-size: 14.5px; letter-spacing: -0.01em; margin-bottom: 3px; }
+  .step .d { font-size: 12.5px; color: var(--ink-faint); line-height: 1.5; }
+
+  /* Section headers ---------------------------------------------------- */
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin: 58px 0 22px; flex-wrap: wrap; }
+  .sec-head h2 { font-family: var(--display); font-weight: 700; font-size: clamp(22px, 3vw, 30px); letter-spacing: -0.02em; margin: 0; }
+  .sec-head .hint { font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); }
+
+  /* Tool: archive + stage --------------------------------------------- */
+  .tool { display: grid; grid-template-columns: 322px 1fr; gap: 24px; align-items: start; scroll-margin-top: 80px; }
+  @media (max-width: 900px) { .tool { grid-template-columns: 1fr; } }
+  aside.archive { position: sticky; top: 78px; }
+  .section-label { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); padding: 2px 4px; margin: 0 0 14px; }
   .section-label b { color: var(--ink-dim); font-weight: 500; }
-
-  /* Archive ----------------------------------------------------------- */
-  aside.archive { position: sticky; top: 24px; }
   .vid-list { display: flex; flex-direction: column; gap: 6px; }
-  .vid {
-    appearance: none; width: 100%; text-align: left; cursor: pointer;
-    background: var(--panel); border: 1px solid var(--line-soft); color: var(--ink);
-    border-radius: var(--radius); padding: 13px 14px;
-    transition: border-color 0.2s var(--ease), transform 0.2s var(--ease), background 0.2s var(--ease);
-    animation: rise 0.5s var(--ease) both;
-  }
+  .vid { appearance: none; width: 100%; text-align: left; cursor: pointer; background: var(--panel);
+    border: 1px solid var(--line-soft); color: var(--ink); border-radius: var(--r); padding: 13px 14px;
+    transition: border-color 0.2s var(--ease), transform 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    animation: rise 0.5s var(--ease) both; }
   .vid:hover { transform: translateY(-1px); border-color: var(--line); background: var(--panel-2); }
   .vid:active { transform: translateY(0); }
   .vid.active { border-color: var(--accent); background: var(--panel-2); box-shadow: var(--shadow-accent); }
@@ -131,130 +181,81 @@
   .vid .name { font-family: var(--display); font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
   .vid .row2 { display: flex; align-items: center; gap: 10px; margin-top: 6px; font-size: 11.5px; color: var(--ink-faint); font-family: var(--mono); }
   .dot-sep { width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: 0.5; }
-  .tag { font-size: 10.5px; font-family: var(--display); font-weight: 600; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.01em; }
-  .tag.done { color: var(--good); background: rgba(91, 191, 138, 0.12); }
+  .tag { font-size: 10.5px; font-family: var(--display); font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+  .tag.done { color: var(--good); background: rgba(91,191,138,0.12); }
   .tag.todo { color: var(--accent); background: var(--accent-soft); }
 
-  /* Stage ------------------------------------------------------------- */
-  section.stage {
-    background: var(--panel); border: 1px solid var(--line-soft);
-    border-radius: var(--radius-lg); min-height: 440px; overflow: hidden;
-    box-shadow: var(--shadow);
-  }
-  .empty { padding: 84px 32px; text-align: center; color: var(--ink-faint); }
-  .empty svg { width: 46px; height: 46px; opacity: 0.5; margin-bottom: 16px; }
-  .empty p { max-width: 40ch; margin: 0 auto; line-height: 1.6; }
+  section.stage { background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--line-soft); border-radius: var(--r-lg); min-height: 460px; overflow: hidden; box-shadow: var(--shadow); }
+  .empty { padding: 78px 32px; text-align: center; color: var(--ink-faint); }
+  .empty .wave { height: 44px; margin: 0 auto 20px; }
+  .empty p { max-width: 42ch; margin: 0 auto; line-height: 1.6; }
 
   .player-wrap { padding: 18px 18px 6px; }
-  video { width: 100%; border-radius: var(--radius); background: #000; display: block; aspect-ratio: 16/9; box-shadow: var(--shadow); }
+  video { width: 100%; border-radius: var(--r); background: #000; display: block; aspect-ratio: 16/9; box-shadow: var(--shadow); }
   .controls { display: flex; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; padding: 0 2px; }
-  .toggle { display: inline-flex; background: var(--bg-tint); border: 1px solid var(--line-soft); border-radius: var(--radius-sm); padding: 3px; gap: 2px; }
-  .toggle button {
-    font: inherit; font-size: 12.5px; font-weight: 600; font-family: var(--display);
-    padding: 6px 13px; background: transparent; color: var(--ink-dim);
-    border: 0; border-radius: 7px; cursor: pointer; transition: all 0.2s var(--ease);
-  }
+  .toggle { display: inline-flex; background: var(--bg-2); border: 1px solid var(--line-soft); border-radius: var(--r-sm); padding: 3px; gap: 2px; }
+  .toggle button { font: inherit; font-size: 12.5px; font-weight: 600; font-family: var(--display); padding: 6px 13px; background: transparent; color: var(--ink-dim); border: 0; border-radius: 7px; cursor: pointer; transition: all 0.2s var(--ease); }
   .toggle button:hover { color: var(--ink); }
   .toggle button.sel { background: var(--accent); color: var(--accent-ink); }
   .meta-inline { font-size: 12.5px; color: var(--ink-faint); font-family: var(--mono); }
 
-  .btn {
-    font: inherit; font-family: var(--display); font-size: 13.5px; font-weight: 600;
-    border-radius: var(--radius-sm); padding: 10px 18px; cursor: pointer;
-    border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
-    transition: transform 0.18s var(--ease), box-shadow 0.2s var(--ease), filter 0.2s var(--ease);
-  }
-  .btn:hover { filter: brightness(1.06); box-shadow: var(--shadow-accent); transform: translateY(-1px); }
-  .btn:active { transform: translateY(0); filter: brightness(0.97); }
-
-  /* Cards ------------------------------------------------------------- */
   .cards { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; padding: 16px 18px; }
   @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
-  .card { background: var(--bg-tint); border: 1px solid var(--line-soft); border-radius: var(--radius); padding: 16px 17px; }
+  .card { background: var(--bg-2); border: 1px solid var(--line-soft); border-radius: var(--r); padding: 16px 17px; }
   .card h3 { margin: 0 0 12px; font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--ink-faint); }
   .cost-figure { font-family: var(--display); font-weight: 700; font-size: 30px; letter-spacing: -0.02em; line-height: 1; }
-  .cost-figure .per { font-size: 13px; color: var(--ink-dim); font-weight: 500; letter-spacing: 0; }
+  .cost-figure .per { font-size: 13px; color: var(--ink-dim); font-weight: 500; }
   .cost-vs { margin-top: 14px; font-size: 13px; color: var(--ink-dim); display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
   .cost-vs .human { color: var(--ink-faint); text-decoration: line-through; text-decoration-thickness: 1px; }
   .cost-vs .arrow { color: var(--ink-faint); }
   .cost-vs .ours { color: var(--good); font-family: var(--display); font-weight: 600; }
   .prov { list-style: none; margin: 0; padding: 0; font-family: var(--mono); font-size: 11.5px; line-height: 1.9; }
   .prov li { color: var(--ink-dim); word-break: break-all; }
-  .prov .k { color: var(--ink-faint); }
-  .prov .hash { color: var(--good); }
+  .prov .k { color: var(--ink-faint); } .prov .hash { color: var(--good); }
 
-  /* Description track ------------------------------------------------- */
   .desc { padding: 4px 18px 20px; }
   .desc h3 { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--ink-faint); margin: 14px 2px 10px; }
-  .cue {
-    display: grid; grid-template-columns: 58px 1fr; gap: 14px;
-    padding: 11px 14px; border-radius: var(--radius-sm); cursor: pointer;
-    border-left: 2px solid transparent;
-    transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
-  }
+  .cue { display: grid; grid-template-columns: 58px 1fr; gap: 14px; padding: 11px 14px; border-radius: var(--r-sm); cursor: pointer; border-left: 2px solid transparent; transition: background 0.2s var(--ease), border-color 0.2s var(--ease); }
   .cue:hover { background: var(--panel-2); }
   .cue.live { background: var(--accent-soft); border-left-color: var(--accent); }
   .cue .t { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); padding-top: 2px; }
   .cue.live .t { color: var(--accent); }
   .cue .body { font-size: 14.5px; line-height: 1.5; }
   .cue .ex { display: inline-block; font-family: var(--display); font-size: 10px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 1px 7px; border-radius: 5px; margin-left: 7px; vertical-align: middle; }
+  .eq { display: none; }
+  .cue.live .eq { display: inline-flex; gap: 2.5px; align-items: flex-end; height: 13px; width: 18px; margin-right: 9px; vertical-align: -2px; }
+  .eq i { width: 2.6px; border-radius: 2px; background: var(--accent); height: 3px; animation: eqb 0.85s ease-in-out infinite; }
+  .eq i:nth-child(2){animation-delay:.18s} .eq i:nth-child(3){animation-delay:.34s} .eq i:nth-child(4){animation-delay:.09s}
+  @keyframes eqb { 0%,100%{height:3px} 50%{height:13px} }
 
-  /* Live describe ----------------------------------------------------- */
-  .live { padding: 20px 20px 8px; }
-  .live-head { font-family: var(--display); font-weight: 600; font-size: 15px; margin: 0 0 4px; }
-  .live-sub { color: var(--ink-dim); font-size: 13.5px; max-width: 52ch; margin: 0 0 18px; line-height: 1.6; }
+  .live { padding: 22px 22px 8px; }
+  .live-head { font-family: var(--display); font-weight: 600; font-size: 16px; margin: 0 0 5px; }
+  .live-sub { color: var(--ink-dim); font-size: 13.5px; max-width: 54ch; margin: 0 0 18px; line-height: 1.6; }
   .log { font-family: var(--mono); font-size: 13px; }
   .log-line { display: flex; align-items: center; gap: 11px; padding: 8px 0; border-bottom: 1px solid var(--line-soft); color: var(--ink-dim); }
   .log-line:last-child { border-bottom: 0; }
-  .log-line .ok { color: var(--good); }
-  .log-line .done-val { color: var(--ink); }
+  .log-line .ok { color: var(--good); } .log-line .done-val { color: var(--ink); }
   .spinner { width: 13px; height: 13px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* Skeletons --------------------------------------------------------- */
-  .sk { background: linear-gradient(100deg, var(--panel) 30%, var(--panel-2) 50%, var(--panel) 70%); background-size: 220% 100%; animation: shimmer 1.3s infinite; border-radius: var(--radius); }
+  .sk { background: linear-gradient(100deg, var(--panel) 30%, var(--panel-2) 50%, var(--panel) 70%); background-size: 220% 100%; animation: shimmer 1.3s infinite; border-radius: var(--r); }
   @keyframes shimmer { to { background-position: -120% 0; } }
-  .sk-vid { height: 62px; margin-bottom: 6px; }
-  .sk-stage { height: 300px; margin: 18px; }
+  .sk-vid { height: 62px; margin-bottom: 6px; } .sk-stage { height: 320px; margin: 18px; }
 
-  /* Brand motion — sound, emitted ------------------------------------- */
-  /* The logo's overtone arcs brighten outward in sequence, like a tone
-     radiating from the fundamental. Slow enough to feel alive, not busy. */
-  .brand .arc { animation: emit 3.4s var(--ease) infinite; }
-  .brand .arc.a1 { --base: 1;    animation-delay: 0s; }
-  .brand .arc.a2 { --base: 0.68; animation-delay: 0.32s; }
-  .brand .arc.a3 { --base: 0.4;  animation-delay: 0.64s; }
-  .brand .core { animation: throb 3.4s var(--ease) infinite; transform-box: fill-box; transform-origin: center; }
-  .brand:hover .arc { animation-duration: 1.6s; }
-  @keyframes emit { 0% { stroke-opacity: var(--base); } 14% { stroke-opacity: 1; } 42%, 100% { stroke-opacity: var(--base); } }
-  @keyframes throb { 0%, 42%, 100% { transform: scale(1); } 11% { transform: scale(1.18); } }
+  /* Scroll reveal ------------------------------------------------------ */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
 
-  /* "Now speaking" equalizer on the live cue. */
-  .eq { display: none; }
-  .cue.live .eq { display: inline-flex; gap: 2.5px; align-items: flex-end; height: 13px; width: 18px; margin-right: 9px; vertical-align: -2px; }
-  .eq i { width: 2.6px; border-radius: 2px; background: var(--accent); height: 3px; animation: eq 0.85s ease-in-out infinite; }
-  .eq i:nth-child(2) { animation-delay: 0.18s; }
-  .eq i:nth-child(3) { animation-delay: 0.34s; }
-  .eq i:nth-child(4) { animation-delay: 0.09s; }
-  @keyframes eq { 0%, 100% { height: 3px; } 50% { height: 13px; } }
+  footer { margin-top: 64px; padding: 26px 0 60px; border-top: 1px solid var(--line-soft); color: var(--ink-faint); font-size: 12.5px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; text-align: center; }
 
-  /* Ambient waveform in the empty state — an idle sound signature. */
-  .wave { display: inline-flex; align-items: center; gap: 4px; height: 44px; margin-bottom: 20px; }
-  .wave i { width: 4px; border-radius: 3px; background: var(--ink-faint); opacity: 0.55; animation: wave 1.8s ease-in-out infinite; }
-  @keyframes wave { 0%, 100% { height: 8px; } 50% { height: 34px; } }
-
-  /* The header aura breathes, very slowly. */
-  header.masthead::after { animation: breathe 9s ease-in-out infinite; }
-  @keyframes breathe { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
-
-  footer { margin-top: 42px; padding-top: 22px; border-top: 1px solid var(--line-soft); color: var(--ink-faint); font-size: 12.5px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; text-align: center; }
-  @media (prefers-reduced-motion: reduce) { *, ::before { animation: none !important; transition: none !important; } }
+  @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation: none !important; transition: none !important; } .reveal { opacity: 1; transform: none; } }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="masthead">
+<nav class="top">
+  <div class="nav-in">
     <div class="brand">
       <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
         <circle class="core" cx="11" cy="21" r="2.9" fill="#ec6a45"/>
@@ -264,30 +265,67 @@
       </svg>
       <span class="wordmark">Overtone</span>
     </div>
-    <p class="lede">
-      WCAG requires a spoken description track on prerecorded video. Human describers charge
-      <strong>$15–$75 a minute</strong>, so archives go undescribed, or get deleted. Overtone reads each
-      video <strong>out of Backblaze B2</strong>, describes the pauses (reading equations and code aloud,
-      not just naming them), and writes the described master back <strong>beside the original</strong>.
-      Nothing leaves your bucket.
-    </p>
-    <div class="status" id="status" aria-label="provider status"></div>
+    <span class="live-pill"><span class="led"></span>live on a real B2 bucket</span>
+    <div class="nav-spacer"></div>
+    <a class="nav-link" href="#tool">Demo</a>
+    <a class="nav-link" href="https://github.com/JonathanSolvesProblems/overtone" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">WCAG audio description, generated in place on Backblaze B2</div>
+        <h1 class="hero-title"><span class="dim">Your archive is already accessible.</span> It just hasn't been described yet.</h1>
+        <p class="hero-sub">
+          Overtone reads each video <strong>out of Backblaze B2</strong>, describes the pauses in the dialogue
+          (reading equations and code aloud, not just naming them), and writes the described master back
+          <strong>beside the original</strong>. Nothing leaves your bucket.
+        </p>
+        <div class="cta-row">
+          <a class="btn" href="#tool">See it live <span class="arrow" aria-hidden="true">↓</span></a>
+          <a class="btn ghost" href="https://github.com/JonathanSolvesProblems/overtone" target="_blank" rel="noopener">View source</a>
+        </div>
+        <div class="status" id="status" aria-label="provider status"></div>
+      </div>
+
+      <div class="hero-viz">
+        <div class="stat-card">
+          <div class="stat-label">cost to describe a finished minute</div>
+          <div class="stat-big">$0.03<span class="u"> / min</span></div>
+          <div class="stat-vs"><span class="human">$15–75 human describer</span><span class="arr">→</span><span class="ours">measured on a real MIT lecture</span></div>
+          <div class="wave" id="herowave" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="steps reveal">
+      <div class="step"><div class="n">01</div><div class="t">Read from B2</div><div class="d">Stream source video straight out of the bucket. No upload, no egress to a vendor.</div></div>
+      <div class="step"><div class="n">02</div><div class="t">Find the pauses</div><div class="d">Transcribe with word-level timings, then locate the silences a describer speaks into.</div></div>
+      <div class="step"><div class="n">03</div><div class="t">Describe and fit</div><div class="d">A vision model reads the screen aloud; the narration is measured and shortened to fit.</div></div>
+      <div class="step"><div class="n">04</div><div class="t">Write back to B2</div><div class="d">Described master, WebVTT, transcript, and a hash-verified manifest, beside the original.</div></div>
+    </div>
   </header>
 
-  <main class="grid">
+  <div class="sec-head reveal">
+    <h2>Try it on the archive</h2>
+    <span class="hint">archive · b2://<span id="bkt">overtone-archive-jon</span></span>
+  </div>
+
+  <main class="tool" id="tool">
     <aside class="archive">
-      <p class="section-label">archive · <b id="bkt">b2</b></p>
+      <p class="section-label">5 lectures · <b>3 described, 2 to do</b></p>
       <div class="vid-list" id="videos" role="list"></div>
     </aside>
-
     <section class="stage" id="stage" aria-live="polite">
       <div class="empty">
         <div class="wave" aria-hidden="true">
-          <i style="animation-delay:0s"></i><i style="animation-delay:.15s"></i><i style="animation-delay:.3s"></i>
-          <i style="animation-delay:.45s"></i><i style="animation-delay:.6s"></i><i style="animation-delay:.45s"></i>
-          <i style="animation-delay:.3s"></i><i style="animation-delay:.15s"></i><i style="animation-delay:0s"></i>
+          <i style="animation-delay:0s"></i><i style="animation-delay:.12s"></i><i style="animation-delay:.24s"></i>
+          <i style="animation-delay:.36s"></i><i style="animation-delay:.48s"></i><i style="animation-delay:.36s"></i>
+          <i style="animation-delay:.24s"></i><i style="animation-delay:.12s"></i><i style="animation-delay:0s"></i>
         </div>
-        <p>Pick a lecture from the archive to hear its description track — or run a live describe on one that isn't done yet.</p>
+        <p>Pick a lecture to hear its description track, or run a live describe on one that isn't done yet.</p>
       </div>
     </section>
   </main>
@@ -309,7 +347,32 @@ const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&am
 
 let CUES = [];
 
+function buildWave() {
+  const w = $("#herowave"); if (!w) return;
+  const n = 44;
+  for (let i = 0; i < n; i++) {
+    const bar = document.createElement("i");
+    // symmetric envelope so it reads as a waveform, staggered for motion
+    const env = 0.4 + 0.6 * Math.sin((i / (n - 1)) * Math.PI);
+    bar.style.animationDelay = `${(Math.abs(i - n / 2) * 0.035).toFixed(2)}s`;
+    bar.style.animationDuration = `${(1.4 + (i % 5) * 0.12).toFixed(2)}s`;
+    bar.style.transform = `scaleY(${env.toFixed(2)})`;
+    w.appendChild(bar);
+  }
+}
+
+function observeReveals() {
+  const els = document.querySelectorAll(".reveal");
+  if (!("IntersectionObserver" in window)) { els.forEach(e => e.classList.add("in")); return; }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  els.forEach(e => io.observe(e));
+}
+
 async function boot() {
+  buildWave();
+  observeReveals();
   renderVideoSkeletons();
   try {
     const h = await (await fetch("/api/health")).json();
@@ -317,8 +380,8 @@ async function boot() {
     const chip = (label, on) => { const c = el("span", "chip" + (on ? " on" : "")); c.innerHTML = `<span class="led"></span>${label}`; s.appendChild(c); };
     chip(`storage <b>Backblaze B2</b>`, h.b2);
     chip(`speech <b>AssemblyAI</b>`, h.stt);
-    chip(`vision <b>${esc((h.vision[0] || "—").split(":")[0])}</b>`, h.vision.length);
-    chip(`voice <b>${esc((h.tts[0] || "—").split(":")[0])}</b>`, h.tts.length);
+    chip(`vision <b>${esc((h.vision[0] || "n/a").split(":")[0])}</b>`, h.vision.length);
+    chip(`voice <b>${esc((h.tts[0] || "n/a").split(":")[0])}</b>`, h.tts.length);
     chip(`demo budget <b>$${esc(h.budget_remaining_usd)}</b>`, h.budget_remaining_usd > 0);
   } catch (e) { /* best effort */ }
   await loadVideos();
@@ -374,7 +437,7 @@ function renderLivePrompt(v) {
   stage.innerHTML = `
     <div class="live">
       <h2 class="live-head">${short}</h2>
-      <p class="live-sub">This one isn't described yet. Run it live — Overtone reads it out of B2, transcribes it, finds the pauses, describes each one, fits the narration, mixes it in, and writes the results back. The same pipeline the CLI runs, on real providers.</p>
+      <p class="live-sub">This one isn't described yet. Run it live: Overtone reads it out of B2, transcribes it, finds the pauses, describes each one, fits the narration, mixes it in, and writes the results back. The same pipeline the CLI runs, on real providers.</p>
       <button class="btn" id="go">Describe it live</button>
     </div>`;
   $("#go").onclick = () => runLive(v.key);
@@ -395,7 +458,7 @@ function runLive(key) {
   es.addEventListener("stt.done", e => step(`Transcribed ${JSON.parse(e.data).words} words with timings`));
   es.addEventListener("gaps.done", e => { const d = JSON.parse(e.data); step(`Found ${d.gaps} describable ${d.gaps === 1 ? "pause" : "pauses"}`); });
   es.addEventListener("frames.done", e => { const d = JSON.parse(e.data); step(`${d.to_describe} to describe · ${d.skipped_repeats} repeats skipped`); });
-  es.addEventListener("described", e => { const d = JSON.parse(e.data); step(`Described pause ${d.gap + 1} — ${d.words} words${d.extended ? " (extended)" : ""}`); });
+  es.addEventListener("described", e => { const d = JSON.parse(e.data); step(`Described pause ${d.gap + 1}: ${d.words} words${d.extended ? " (extended)" : ""}`); });
   es.addEventListener("compose.start", () => step("Mixing descriptions into the audio…"));
   es.addEventListener("upload.start", () => step("Writing described master, VTT and manifest back to B2…"));
   es.addEventListener("complete", async e => {
