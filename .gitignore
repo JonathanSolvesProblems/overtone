@@ -25,6 +25,9 @@ out/
 SUBMISSION.md
 /thumbnail.png
 
+# Recorded b-roll for the demo video (local only)
+broll/
+
 # OS
 Thumbs.db
 .DS_Store
