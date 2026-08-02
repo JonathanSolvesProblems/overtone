@@ -4,10 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Overtone — audio description for your archive, in place on B2</title>
-<meta name="description" content="Overtone generates WCAG audio-description tracks for a whole video archive, in place on Backblaze B2. It reads equations and code aloud, fits each description to the pause, and writes the described master back beside the original." />
+<meta name="description" content="Overtone generates WCAG audio-description tracks for a whole video archive, in place on Backblaze B2. It reads the board aloud (equations, code, and diagrams), fits each description to the pause, and writes the described master back beside the original." />
 <meta name="theme-color" content="#0b0d12" />
 <meta property="og:title" content="Overtone — audio description for your archive, on Backblaze B2" />
-<meta property="og:description" content="Generates WCAG audio-description tracks for a whole video archive, in place on B2. Reads equations and code aloud. ~$0.03/min vs $15–75 for a human describer." />
+<meta property="og:description" content="Generates WCAG audio-description tracks for a whole video archive, in place on B2. Reads the board aloud: equations, code, and diagrams. About three cents a minute vs $15–75 for a human describer." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://overtone.jonathanandrei.com/" />
 <meta property="og:image" content="https://overtone.jonathanandrei.com/og.png" />
@@ -286,7 +286,7 @@
         <h1 class="hero-title"><span class="dim">Your archive is already accessible.</span> It just hasn't been described yet.</h1>
         <p class="hero-sub">
           Overtone reads each video <strong>out of Backblaze B2</strong>, describes the pauses in the dialogue
-          (reading equations and code aloud, not just naming them), and writes the described master back
+          (reading the board aloud: equations, code, and diagrams, not just naming them), and writes the described master back
           <strong>beside the original</strong>. Nothing leaves your bucket.
         </p>
         <div class="cta-row">
@@ -299,7 +299,7 @@
       <div class="hero-viz">
         <div class="stat-card">
           <div class="stat-label">cost to describe a finished minute</div>
-          <div class="stat-big">$0.03<span class="u"> / min</span></div>
+          <div class="stat-big" id="heroCost">$0.03<span class="u"> / min</span></div>
           <div class="stat-vs"><span class="human">$15–75 human describer</span><span class="arr">→</span><span class="ours">measured on a real MIT lecture</span></div>
           <div class="wave" id="herowave" aria-hidden="true"></div>
         </div>
@@ -321,7 +321,7 @@
 
   <main class="tool" id="tool">
     <aside class="archive">
-      <p class="section-label">5 lectures · <b>3 described, 2 to do</b></p>
+      <p class="section-label" id="lecCount">the archive</p>
       <div class="vid-list" id="videos" role="list"></div>
     </aside>
     <section class="stage" id="stage" aria-live="polite">
@@ -366,7 +366,7 @@
     <div style="width:100%;text-align:center;margin-top:10px;font-size:11.5px;color:var(--ink-faint)">
       Real-footage sample from
       <a href="https://ocw.mit.edu/courses/18-03-differential-equations-spring-2010/" target="_blank" rel="noopener">MIT OpenCourseWare 18.03</a>,
-      © MIT, used under CC BY-NC-SA. The described version is shared under the same license.
+      © MIT, used under CC BY-NC-SA 4.0. The described version is shared under the same license.
     </div>
   </footer>
 </div>
@@ -449,6 +449,17 @@ async function loadVideos() {
     b.onclick = () => selectVideo(v);
     list.appendChild(b);
   });
+
+  const done = videos.filter(v => v.described).length;
+  const todo = videos.length - done;
+  const lc = $("#lecCount");
+  if (lc) lc.innerHTML = `${videos.length} lectures · <b>${done} described, ${todo} to do</b>`;
+
+  const mit = videos.find(v => v.key.includes("mit-1803"));
+  const hc = $("#heroCost");
+  if (hc && mit && mit.cost_per_minute != null) {
+    hc.innerHTML = `$${Number(mit.cost_per_minute).toFixed(2)}<span class="u"> / min</span>`;
+  }
 }
 
 function markActive(key) {

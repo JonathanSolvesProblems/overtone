@@ -2,14 +2,21 @@
 
 **Audio description for a video archive, generated in place, on Backblaze B2.**
 
-WCAG 2.1 (SC 1.2.5) requires a spoken *audio description* track on prerecorded
-video: a narrator describing what is on screen, spoken into the pauses in
-dialogue. It is the accessibility requirement almost everyone skips, because
-captions are cheap and description is not. Human describers charge **$15–$75 per
-finished minute**, so a university with twenty thousand lecture recordings faces
-a bill in the millions and the archive stays non-compliant, or gets taken
-offline. In 2017 UC Berkeley removed 20,000+ lectures from public access rather
-than pay to remediate them.
+[Watch the 2-minute demo](https://www.youtube.com/watch?v=H294cHpI5jA) · [Live app](https://overtone.jonathanandrei.com) · [Source](https://github.com/JonathanSolvesProblems/overtone)
+
+[WCAG 2.1 (SC 1.2.5)](https://www.w3.org/WAI/WCAG21/Understanding/audio-description-prerecorded.html)
+requires a spoken *audio description* track on prerecorded video: a narrator
+describing what is on screen, spoken into the pauses in dialogue. It is the
+accessibility requirement almost everyone skips, because captions are cheap and
+description is not. Human describers charge
+[**$15–$75 per finished minute**](https://www.3playmedia.com/blog/how-much-does-audio-description-cost/),
+so a university with twenty thousand lecture recordings faces a bill in the
+millions and the archive stays non-compliant, or gets taken offline. In 2017,
+[UC Berkeley removed 20,000+ lectures](https://www.insidehighered.com/news/2017/03/06/u-california-berkeley-delete-publicly-available-educational-content)
+from public access rather than pay to remediate them. US public entities owe
+WCAG 2.1 AA under the
+[DOJ's ADA Title II rule](https://www.ada.gov/resources/2024-03-08-web-rule/) by
+April 26, 2027.
 
 Overtone makes describing an entire archive cheap enough to actually do, and it
 does the work **where the archive already lives**. It reads each video out of a
@@ -18,11 +25,11 @@ master back beside the original. Nothing is uploaded to a third-party vendor;
 FERPA-covered recordings never leave the storage you already trust.
 
 **Measured on real footage:** a 3-minute segment of an actual MIT OpenCourseWare
-lecture (18.03 Differential Equations, a chalkboard class) cost **$0.08 to
-describe, about $0.03 per finished minute** end to end, against a human
-describer's **$15–$75**. Most of that is the ElevenLabs voice; swapping to OpenAI
-TTS at archive scale brings it closer to a cent a minute. Either way it is three
-to four orders of magnitude cheaper than a person.
+lecture (18.03 Differential Equations, a chalkboard class) cost **about nine cents
+to describe, roughly three cents per finished minute** end to end, against a human
+describer's **$15–$75**. It reads the board with GPT-4o and voices the track with
+OpenAI TTS; short clips cost more per minute because fixed transcription overhead
+does not amortize. Either way it is hundreds to thousands of times cheaper than a person.
 
 ---
 
@@ -43,8 +50,8 @@ And one thing generic description gets wrong that matters for lectures:
 
 3. **Technical content.** Generic tools say *"a slide with an equation
    appears."* That is useless to a blind engineering student. Overtone reads the
-   board: equations as spoken math (*"y equals m x plus b"*), code line by line
-   with punctuation, charts as trends and values.
+   board: equations as spoken math (*"y equals m x plus b"*), diagrams traced
+   node by node, on-screen text read verbatim, not just that a slide is present.
 
 Batch AI-description SaaS does exist (ViddyScribe, MediaScribe, Maestra). The
 distinction is where the work runs: those are services you upload your archive
@@ -99,7 +106,7 @@ unchanged video is skipped, a replaced one is re-described.
 | Role | Provider | Model | Via |
 |------|----------|-------|-----|
 | Speech-to-text (word timings) | **AssemblyAI** | `universal-2` | Genblaze connector |
-| Description (vision) | **OpenAI** (or Google / GMI Cloud) | `gpt-4o-mini` | Genblaze chat + Overtone's multimodal adapter |
+| Description (vision) | **OpenAI** (or Google / GMI Cloud) | `gpt-4o` | Genblaze chat + Overtone's multimodal adapter |
 | Voice | **ElevenLabs** (OpenAI TTS failover) | `eleven_multilingual_v2` / `tts-1` | Genblaze connectors |
 | Storage | **Backblaze B2** | S3-compatible | `genblaze-s3` |
 
@@ -157,15 +164,39 @@ live describe on a curated clip, watching the pipeline work over server-sent
 events. A spend cap, per-client rate limit, and video allowlist keep it safe on
 a public URL. See [`Dockerfile`](Dockerfile) and [`fly.toml`](fly.toml).
 
+A 2-minute walkthrough is on YouTube: <https://www.youtube.com/watch?v=H294cHpI5jA>
+
 ## Tests
 
 ```bash
-pytest        # ~140 tests: timing logic, mixing, change detection,
+pytest        # ~150 tests: timing logic, mixing, change detection,
               # the fit loop against a mock provider, cost model, guard
 ```
 
 The media tests shell out to real ffmpeg; the fit-loop tests prove convergence
 against a mock TTS provider with no API keys.
+
+## Sources
+
+Every factual claim in this README and in the demo video is backed by a public
+source. The demo shows each of these pages on screen as it makes the claim.
+
+- **WCAG 2.1 requires audio description (SC 1.2.5, Level AA)** — W3C, *Understanding
+  SC 1.2.5: Audio Description (Prerecorded)*:
+  <https://www.w3.org/WAI/WCAG21/Understanding/audio-description-prerecorded.html>
+- **US public entities must meet WCAG 2.1 AA by April 26, 2027 (populations 50,000+)** —
+  U.S. Department of Justice, fact sheet on the ADA Title II web and mobile app rule:
+  <https://www.ada.gov/resources/2024-03-08-web-rule/>
+- **Human audio description costs $15–$75 per finished minute** — 3Play Media,
+  *How Much Does Audio Description Cost?*:
+  <https://www.3playmedia.com/blog/how-much-does-audio-description-cost/>
+- **UC Berkeley removed 20,000+ lectures from public access (2017) rather than
+  remediate them** — Inside Higher Ed, *Berkeley Will Delete Online Content* (March 2017):
+  <https://www.insidehighered.com/news/2017/03/06/u-california-berkeley-delete-publicly-available-educational-content>
+- **Real-footage demo sample** — MIT OpenCourseWare, 18.03 Differential Equations
+  (Spring 2010), © MIT, used under CC BY-NC-SA 4.0; the described version is shared
+  under the same license:
+  <https://ocw.mit.edu/courses/18-03-differential-equations-spring-2010/>
 
 ## License
 

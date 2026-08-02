@@ -7,6 +7,8 @@ import pytest
 from overtone.costs import (
     STT_PER_HOUR,
     TTS_PER_1M_CHARS,
+    VISION_INPUT_PER_1M,
+    VISION_OUTPUT_PER_1M,
     Usage,
     estimate_cost,
 )
@@ -49,7 +51,9 @@ def test_vision_prefers_real_token_counts():
     cost = estimate_cost(usage)
     # Input tokens dominate; verify it used the reported count, not the frame
     # approximation (3 * 1100 = 3300 < 5000).
-    assert cost.vision == pytest.approx(5000 / 1_000_000 * 0.15 + 100 / 1_000_000 * 0.60)
+    assert cost.vision == pytest.approx(
+        5000 / 1_000_000 * VISION_INPUT_PER_1M + 100 / 1_000_000 * VISION_OUTPUT_PER_1M
+    )
 
 
 def test_per_minute_scales_by_media_length():

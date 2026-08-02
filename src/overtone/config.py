@@ -76,7 +76,7 @@ class Settings:
 # gemini-2.5-flash now 404s for new keys). Vision-capable and free-tier eligible.
 _VISION_DEFAULTS = {
     "google": "gemini-flash-latest",
-    "openai": "gpt-4o-mini",
+    "openai": "gpt-4o",
     "gmicloud": "Qwen/Qwen2.5-VL-7B-Instruct",
 }
 

@@ -20,11 +20,12 @@ from dataclasses import dataclass, field
 # AssemblyAI speech-to-text, per hour of audio.
 STT_PER_HOUR = 0.12
 
-# OpenAI, per 1M tokens. gpt-4o-mini vision input is billed as tokens; image
-# tiles add tokens we approximate per frame below.
-VISION_INPUT_PER_1M = 0.15
-VISION_OUTPUT_PER_1M = 0.60
-# A downscaled 768px frame is on the order of ~1.1k tokens to gpt-4o-mini.
+# OpenAI, per 1M tokens. Vision input is billed as tokens; image tiles add
+# tokens we approximate per frame below. Priced for gpt-4o (the model the
+# describer uses for accurate board reading); gpt-4o-mini would be ~16x cheaper.
+VISION_INPUT_PER_1M = 2.50
+VISION_OUTPUT_PER_1M = 10.00
+# A downscaled 768px frame is on the order of ~1.1k tokens to gpt-4o.
 VISION_TOKENS_PER_FRAME = 1_100
 
 # Text-to-speech, per 1M characters.
