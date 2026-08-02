@@ -9,7 +9,7 @@ requires a spoken *audio description* track on prerecorded video: a narrator
 describing what is on screen, spoken into the pauses in dialogue. It is the
 accessibility requirement almost everyone skips, because captions are cheap and
 description is not. Human describers charge
-[**$15–$75 per finished minute**](https://www.3playmedia.com/blog/how-much-does-audio-description-cost/),
+[**$15 to $75 per finished minute**](https://www.3playmedia.com/blog/how-much-does-audio-description-cost/),
 so a university with twenty thousand lecture recordings faces a bill in the
 millions and the archive stays non-compliant, or gets taken offline. In 2017,
 [UC Berkeley removed 20,000+ lectures](https://www.insidehighered.com/news/2017/03/06/u-california-berkeley-delete-publicly-available-educational-content)
@@ -27,7 +27,7 @@ FERPA-covered recordings never leave the storage you already trust.
 **Measured on real footage:** a 3-minute segment of an actual MIT OpenCourseWare
 lecture (18.03 Differential Equations, a chalkboard class) cost **about nine cents
 to describe, roughly three cents per finished minute** end to end, against a human
-describer's **$15–$75**. It reads the board with GPT-4o and voices the track with
+describer's **$15 to $75**. It reads the board with GPT-4o and voices the track with
 OpenAI TTS; short clips cost more per minute because fixed transcription overhead
 does not amortize. Either way it is hundreds to thousands of times cheaper than a person.
 
@@ -181,19 +181,19 @@ against a mock TTS provider with no API keys.
 Every factual claim in this README and in the demo video is backed by a public
 source. The demo shows each of these pages on screen as it makes the claim.
 
-- **WCAG 2.1 requires audio description (SC 1.2.5, Level AA)** — W3C, *Understanding
+- **WCAG 2.1 requires audio description (SC 1.2.5, Level AA)**. W3C, *Understanding
   SC 1.2.5: Audio Description (Prerecorded)*:
   <https://www.w3.org/WAI/WCAG21/Understanding/audio-description-prerecorded.html>
-- **US public entities must meet WCAG 2.1 AA by April 26, 2027 (populations 50,000+)** —
+- **US public entities must meet WCAG 2.1 AA by April 26, 2027 (populations 50,000+)**.
   U.S. Department of Justice, fact sheet on the ADA Title II web and mobile app rule:
   <https://www.ada.gov/resources/2024-03-08-web-rule/>
-- **Human audio description costs $15–$75 per finished minute** — 3Play Media,
+- **Human audio description costs $15 to $75 per finished minute**. 3Play Media,
   *How Much Does Audio Description Cost?*:
   <https://www.3playmedia.com/blog/how-much-does-audio-description-cost/>
 - **UC Berkeley removed 20,000+ lectures from public access (2017) rather than
-  remediate them** — Inside Higher Ed, *Berkeley Will Delete Online Content* (March 2017):
+  remediate them**. Inside Higher Ed, *Berkeley Will Delete Online Content* (March 2017):
   <https://www.insidehighered.com/news/2017/03/06/u-california-berkeley-delete-publicly-available-educational-content>
-- **Real-footage demo sample** — MIT OpenCourseWare, 18.03 Differential Equations
+- **Real-footage demo sample**. MIT OpenCourseWare, 18.03 Differential Equations
   (Spring 2010), © MIT, used under CC BY-NC-SA 4.0; the described version is shared
   under the same license:
   <https://ocw.mit.edu/courses/18-03-differential-equations-spring-2010/>

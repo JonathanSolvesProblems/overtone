@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Overtone — audio description for your archive, in place on B2</title>
+<title>Overtone: audio description for your archive, in place on B2</title>
 <meta name="description" content="Overtone generates WCAG audio-description tracks for a whole video archive, in place on Backblaze B2. It reads the board aloud (equations, code, and diagrams), fits each description to the pause, and writes the described master back beside the original." />
 <meta name="theme-color" content="#0b0d12" />
-<meta property="og:title" content="Overtone — audio description for your archive, on Backblaze B2" />
-<meta property="og:description" content="Generates WCAG audio-description tracks for a whole video archive, in place on B2. Reads the board aloud: equations, code, and diagrams. About three cents a minute vs $15–75 for a human describer." />
+<meta property="og:title" content="Overtone: audio description for your archive, on Backblaze B2" />
+<meta property="og:description" content="Generates WCAG audio-description tracks for a whole video archive, in place on B2. Reads the board aloud: equations, code, and diagrams. About three cents a minute vs $15 to $75 for a human describer." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://overtone.jonathanandrei.com/" />
 <meta property="og:image" content="https://overtone.jonathanandrei.com/og.png" />
@@ -300,7 +300,7 @@
         <div class="stat-card">
           <div class="stat-label">cost to describe a finished minute</div>
           <div class="stat-big" id="heroCost">$0.03<span class="u"> / min</span></div>
-          <div class="stat-vs"><span class="human">$15–75 human describer</span><span class="arr">→</span><span class="ours">measured on a real MIT lecture</span></div>
+          <div class="stat-vs"><span class="human">$15 to $75 human describer</span><span class="arr">→</span><span class="ours">measured on a real MIT lecture</span></div>
           <div class="wave" id="herowave" aria-hidden="true"></div>
         </div>
       </div>
@@ -362,6 +362,8 @@
       <span>stored on Backblaze B2</span>
       <span aria-hidden="true">·</span>
       <a href="https://github.com/JonathanSolvesProblems/overtone" target="_blank" rel="noopener">source</a>
+      <span aria-hidden="true">·</span>
+      <span>built by <a href="https://jonathanandrei.com" target="_blank" rel="noopener">jonathanandrei.com</a></span>
     </div>
     <div style="width:100%;text-align:center;margin-top:10px;font-size:11.5px;color:var(--ink-faint)">
       Real-footage sample from
@@ -556,7 +558,7 @@ function renderResult(r) {
       <article class="card">
         <h3>cost of this description track</h3>
         <div class="cost-figure">$${r.cost.total.toFixed(4)} <span class="per">· $${perMin.toFixed(4)}/min</span></div>
-        <div class="cost-vs"><span class="human">$${r.human_cost_low}–$${r.human_cost_high} human</span><span class="arrow">→</span><span class="ours">Overtone $${r.cost.total.toFixed(2)}</span></div>
+        <div class="cost-vs"><span class="human">$${r.human_cost_low} to $${r.human_cost_high} human</span><span class="arrow">→</span><span class="ours">Overtone $${r.cost.total.toFixed(2)}</span></div>
       </article>
       <article class="card">
         <h3>provenance · in your bucket</h3>
